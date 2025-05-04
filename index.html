@@ -13,8 +13,22 @@
     <div class="site-title">Ukay Ph</div>
     <div class="button-row">
         <button class="logout-btn" onclick="handleLogout()">Logout</button>
-      <button class="login-btn" onclick="handleLogin()">Login</button>
-      <button class="register-btn">Register</button>
+      
+
+        <div class="button-row">
+          <div class="dropdown">
+            <button class="login-btn" onclick="toggleLoginDropdown()">Login</button>
+            <div id="login-dropdown" class="dropdown-content">
+              <input type="text" id="login-username" placeholder="Username" />
+              <input type="password" id="login-password" placeholder="Password" />
+              <button onclick="submitLogin()">Submit</button>
+            </div>
+          </div>
+          <button class="register-btn" onclick="handleRegister()">Register</button>
+        </div>
+
+
+      
     </div>
   </header>
 

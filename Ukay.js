@@ -83,3 +83,46 @@ function handleLogout() {
   })
   .catch(error => console.error("Logout error:", error));
 }
+
+
+
+function toggleLoginDropdown() {
+  const dropdown = document.getElementById("login-dropdown");
+  dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
+}
+
+function submitLogin() {
+  const username = document.getElementById("login-username").value;
+  const password = document.getElementById("login-password").value;
+
+  if (!username || !password) {
+    alert("Please enter both username and password.");
+    return;
+  }
+
+  fetch(`${API_BASE}/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username, password })
+  })
+  .then(response => {
+    if (!response.ok) throw new Error("Network response was not ok");
+    return response.json();
+  })
+  .then(data => {
+    if (data.token && data.user) {
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
+
+      showLoginStatus(`Welcome, ${data.user.username}!`);
+      document.querySelector(".login-btn").style.display = "none";
+      document.getElementById("login-dropdown").style.display = "none";
+    } else {
+      alert("Login failed.");
+    }
+  })
+  .catch(error => {
+    console.error("Login error:", error);
+    alert("Login error: " + error.message);
+  });
+}
