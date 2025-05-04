@@ -78,6 +78,8 @@ function handleLogout() {
   .then(response => response.json())
   .then(data => {
     alert("Logged out successfully!");
+    showLoginStatus(`Bye, You are now logged out.`);
+    document.querySelector(".logout-btn").style.display = "none";
   })
   .catch(error => console.error("Logout error:", error));
 }
