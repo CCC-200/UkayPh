@@ -80,6 +80,7 @@ function handleLogout() {
     alert("Logged out successfully!");
     showLoginStatus(`Bye, You are now logged out.`);
     document.querySelector(".logout-btn").style.display = "none";
+    document.querySelector(".login-btn").style.display = "block";
   })
   .catch(error => console.error("Logout error:", error));
 }
@@ -117,6 +118,7 @@ function submitLogin() {
       showLoginStatus(`Welcome, ${data.user.username}!`);
       document.querySelector(".login-btn").style.display = "none";
       document.getElementById("login-dropdown").style.display = "none";
+      document.querySelector(".logout-btn").style.display = "block";
     } else {
       alert("Login failed.");
     }
