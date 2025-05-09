@@ -121,6 +121,13 @@
     transition: transform 0.2s;
   }
   
+  .product-buttons {
+    margin-top: 10px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+  }
+  
   .product-card:hover {
     transform: translateY(-5px);
   }
@@ -156,3 +163,21 @@
     color: #999;
     margin-right: 6px;
   }
+
+.header-banner {
+  width: 100%;
+  overflow: hidden;
+}
+
+.header-banner .banner-overlay {
+  width: 100%;
+  height: auto;
+  display: block;
+  background: none;
+}
+
+.header-banner img {
+  width: 100%;
+  height: auto;
+  display: block;
+}

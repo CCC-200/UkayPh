@@ -197,6 +197,9 @@ function toggleRegisterDropdown() {
 }
 
 
+
+let allProducts = []; // global array
+
 function loadProducts() {
   const token = localStorage.getItem("token");
 
@@ -208,60 +211,193 @@ function loadProducts() {
     },
     body: JSON.stringify({})
   })
-  .then(response => {
-    if (!response.ok) throw new Error("Failed to fetch products");
-    return response.json();
-  })
+  .then(response => response.json())
   .then(responseData => {
-    console.log("Received data:", responseData);
-  
-    const products = responseData.products; // or adjust if the key is different
+    const products = responseData.products;
     if (!Array.isArray(products)) {
       console.error("Expected an array but got:", products);
       return;
     }
-  
-    const list = document.getElementById("product-list");
-    list.innerHTML = "";
-  
-    products.forEach(product => {
-      const card = document.createElement("div");
-      card.className = "product-card";
-  
-      const img = document.createElement("img");
-      img.src = product.imagePath || "placeholder.jpg";
-      img.alt = product.name;
-  
-      const details = document.createElement("div");
-      details.className = "product-details";
-  
-      const name = document.createElement("h3");
-      name.textContent = product.name;
-  
-      const description = document.createElement("p");
-      description.textContent = product.description || "";
-  
-      const price = document.createElement("p");
-      if (product.promo) {
-        price.innerHTML = `<span class="old-price">₱${product.price.toFixed(2)}</span><span class="price-tag"> ₱${product.promo.toFixed(2)}</span>`;
-      } else {
-        price.innerHTML = `<span class="price-tag">₱${product.price.toFixed(2)}</span>`;
-      }
-  
-      const shop = document.createElement("p");
-      shop.textContent = product.shop?.shopName ? `Shop: ${product.shop.shopName}` : "";
-  
-      details.appendChild(name);
-      details.appendChild(description);
-      details.appendChild(price);
-      details.appendChild(shop);
-  
-      card.appendChild(img);
-      card.appendChild(details);
-      list.appendChild(card);
-    });
+
+    allProducts = products; // store for sorting
+    renderProducts(allProducts);
   })
   .catch(error => {
     console.error("Error loading products:", error);
   });
 }
+
+function renderProducts(products) {
+  const list = document.getElementById("product-list");
+  list.innerHTML = "";
+
+  products.forEach(product => {
+    const card = document.createElement("div");
+    card.className = "product-card";
+
+    const img = document.createElement("img");
+    img.src = product.imagePath || "placeholder.jpg";
+    img.alt = product.name;
+
+    const details = document.createElement("div");
+    details.className = "product-details";
+
+    const name = document.createElement("h3");
+    name.textContent = product.name;
+
+    const description = document.createElement("p");
+    description.textContent = product.description || "";
+
+    const price = document.createElement("p");
+    if (product.promo) {
+      price.innerHTML = `<span class="old-price">₱${product.price.toFixed(2)}</span><span class="price-tag"> ₱${product.promo.toFixed(2)}</span>`;
+    } else {
+      price.innerHTML = `<span class="price-tag">₱${product.price.toFixed(2)}</span>`;
+    }
+
+    const shop = document.createElement("p");
+    shop.textContent = product.shop?.shopName ? `Shop: ${product.shop.shopName}` : "";
+
+    const buttonGroup = document.createElement("div");
+    buttonGroup.className = "product-buttons";
+
+    const likeBtn = document.createElement("button");
+    likeBtn.className = "btn btn-outline-danger btn-sm me-2";
+    likeBtn.innerHTML = `❤️ ${product.likes || 0}`;
+    likeBtn.onclick = () => heartProduct(product.id);
+
+    const cartBtn = document.createElement("button");
+    cartBtn.className = "btn btn-outline-primary btn-sm";
+    cartBtn.innerHTML = "🛒 Add to Cart";
+    cartBtn.onclick = () => addToCart(product.id);
+
+    buttonGroup.appendChild(likeBtn);
+    buttonGroup.appendChild(cartBtn);
+
+    details.appendChild(name);
+    details.appendChild(description);
+    details.appendChild(price);
+    details.appendChild(shop);
+    details.appendChild(buttonGroup);
+
+    card.appendChild(img);
+    card.appendChild(details);
+    list.appendChild(card);
+  });
+}
+
+function handleSortChange() {
+  const sortOption = document.getElementById("sortSelect").value;
+  let sorted = [...allProducts];
+
+  switch (sortOption) {
+    case "priceLowHigh":
+      sorted.sort((a, b) => (a.promo || a.price) - (b.promo || b.price));
+      break;
+    case "priceHighLow":
+      sorted.sort((a, b) => (b.promo || b.price) - (a.promo || a.price));
+      break;
+    case "nameAZ":
+      sorted.sort((a, b) => a.name.localeCompare(b.name));
+      break;
+    case "nameZA":
+      sorted.sort((a, b) => b.name.localeCompare(a.name));
+      break;
+    default:
+      sorted = [...allProducts];
+  }
+
+  renderProducts(sorted);
+}
+
+function applyFilters() {
+  const query = document.getElementById("searchInput").value.toLowerCase();
+  const sortOption = document.getElementById("sortSelect").value;
+
+  let filtered = allProducts.filter(p =>
+    p.name.toLowerCase().includes(query) ||
+    (p.description && p.description.toLowerCase().includes(query)) ||
+    (p.tags && p.tags.toLowerCase().includes(query)) ||
+    (p.shop?.shopName && p.shop.shopName.toLowerCase().includes(query))
+  );
+
+  switch (sortOption) {
+    case "priceLowHigh":
+      filtered.sort((a, b) => a.price - b.price);
+      break;
+    case "priceHighLow":
+      filtered.sort((a, b) => b.price - a.price);
+      break;
+    case "nameAZ":
+      filtered.sort((a, b) => a.name.localeCompare(b.name));
+      break;
+    case "nameZA":
+      filtered.sort((a, b) => b.name.localeCompare(a.name));
+      break;
+  }
+
+  renderProducts(filtered);
+}
+
+function clearSearch() {
+  document.getElementById("searchInput").value = "";
+  applyFilters();
+}
+
+
+function heartProduct(productId, buttonElement) {
+  if (!isLoggedIn()) {
+    showLoginModal();
+    return;
+  }
+
+  fetch(`${API_BASE}/like`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${localStorage.getItem("token")}`
+    },
+    body: JSON.stringify({ productId })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      // Find the span showing like count in this product card
+      const likeCountSpan = buttonElement.querySelector(".like-count");
+      if (likeCountSpan) {
+        const current = parseInt(likeCountSpan.textContent, 10);
+        likeCountSpan.textContent = current + 1;
+      }
+    } else {
+      alert("Failed to like: " + (data.message || "Unknown error"));
+    }
+  })
+  .catch(err => console.error("Like error:", err));
+}
+
+function addToCart(productId) {
+  if (!isLoggedIn()) {
+    showLoginModal();
+    return;
+  }
+  // Continue with cart logic
+  alert("Product added to cart!");
+}
+
+function ToggleCart(productId) {
+  if (!isLoggedIn()) {
+    showLoginModal();
+    return;
+  }
+ 
+}
+
+function isLoggedIn() {
+  return !!localStorage.getItem("token");
+}
+
+function showLoginModal() {
+  const loginModal = new bootstrap.Modal(document.getElementById("loginModal"));
+  loginModal.show();
+}
+
