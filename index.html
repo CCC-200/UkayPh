@@ -8,7 +8,7 @@
   </style>
 </head>
 <body>
-
+  <script src="Ukay.js"></script>
   <header>
     <div class="site-title">Ukay Ph</div>
     <div class="button-row">
@@ -24,7 +24,20 @@
               <button onclick="submitLogin()">Submit</button>
             </div>
           </div>
-          <button class="register-btn" onclick="handleRegister()">Register</button>
+          <div class="dropdown">
+            <button class="register-btn" onclick="toggleRegisterDropdown()">Register</button>
+            <div id="register-dropdown" class="dropdown-content">
+              <input type="text" id="register-username" placeholder="Username" />
+              <input type="password" id="register-password" placeholder="Password" />
+              <select id="register-usertype">
+                <option value="">Select user type</option>
+                <option value="shop">Shop</option>
+                <option value="customer">Customer</option>
+                <option value="delivery">Delivery</option>
+              </select>
+              <button onclick="submitRegister()">Submit</button>
+            </div>
+          </div>
         </div>
 
 
@@ -33,11 +46,15 @@
   </header>
 
   <main>
-    <h1>Welcome to Ukay Ovh Website</h1>
-    <p>This is a clean and basic layout with login and register buttons in the header.</p>
+    <h1>Welcome to Ukay.Ph Website</h1>
+    <p>Your one stop shop for thrift shop store in Iligan City</p>
     <div id="login-status"></div>
+
+
+    <div id="product-list" class="product-grid"></div>
   </main>
-  <script src="Ukay.js"></script>
+ 
+  <div id="product-list" class="product-grid"></div>
 
 </body>
 </html>
