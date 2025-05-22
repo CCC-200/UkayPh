@@ -31,6 +31,10 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("add-product-btn").style.display = "inline-block";
     document.querySelector(".ShopDetails-btn").style.display = "inline-block";
   }
+  if (data.user.userType === "customer") {
+      document.getElementById("cart-icon").style.display = "inline-block";
+  }
+ 
       } else {
         document.querySelector(".login-btn").style.display = "block";
         document.querySelector(".logout-btn").style.display = "none";
@@ -98,6 +102,9 @@ function handleLogin() {
       const errorMessage = data.error || data.message || res.statusText;
       alert("failed: " + (data.message || errorMessage));
     });
+    if (data.user.userType === "customer") {
+      document.getElementById("cart-icon").style.display = "inline-block";
+  }
   }
   
   // Helper to show login status
@@ -148,6 +155,8 @@ function submitRegister() {
     document.getElementById("add-product-btn").style.display = "inline-block";
     document.querySelector(".ShopDetails-btn").style.display = "inline-block";
     
+  }if (data.user.userType === "customer") {
+      document.getElementById("cart-icon").style.display = "inline-block";
   }
     } else {
       alert("Registration failed.");
@@ -230,6 +239,8 @@ function submitLogin() {
     document.getElementById("add-product-btn").style.display = "inline-block";
     document.querySelector(".ShopDetails-btn").style.display = "inline-block";
    
+  }if (data.user.userType === "customer") {
+      document.getElementById("cart-icon").style.display = "inline-block";
   }
   
     } else {
