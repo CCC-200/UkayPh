@@ -27,6 +27,7 @@ document.addEventListener("DOMContentLoaded", () => {
         document.querySelector(".register-btn").style.display = "none";
         
     if (data.user.userType === "shop") {
+      document.getElementById("cart-icon").style.display = "none";
     document.getElementById("add-product-btn").style.display = "inline-block";
     document.querySelector(".ShopDetails-btn").style.display = "inline-block";
   }
@@ -78,6 +79,7 @@ function handleLogin() {
         showLoginStatus(`Welcome, ${data.user.username}! You are now logged in as a ${data.user.userType}.`);
         document.querySelector(".profile-btn").style.display = "inline-block";
           if (data.user.userType === "shop") {
+            document.getElementById("cart-icon").style.display = "none";
     document.getElementById("add-product-btn").style.display = "inline-block";
     document.querySelector(".ShopDetails-btn").style.display = "inline-block";
     
@@ -142,6 +144,7 @@ function submitRegister() {
       document.querySelector(".logout-btn").style.display = "inline-block";
       document.querySelector(".profile-btn").style.display = "inline-block";
       if (data.user.userType === "shop") {
+        document.getElementById("cart-icon").style.display = "none";
     document.getElementById("add-product-btn").style.display = "inline-block";
     document.querySelector(".ShopDetails-btn").style.display = "inline-block";
     
@@ -223,6 +226,7 @@ function submitLogin() {
       document.querySelector(".profile-btn").style.display = "inline-block";
 
         if (data.user.userType === "shop") {
+          document.getElementById("cart-icon").style.display = "none";
     document.getElementById("add-product-btn").style.display = "inline-block";
     document.querySelector(".ShopDetails-btn").style.display = "inline-block";
    
@@ -451,7 +455,13 @@ function ToggleCart(productId) {
   }
  
 }
-
+function ToggleNotifications(productId) {
+  if (!isLoggedIn()) {
+    showLoginModal();
+    return;
+  }
+ 
+}
 function isLoggedIn() {
   return !!localStorage.getItem("token");
 }
