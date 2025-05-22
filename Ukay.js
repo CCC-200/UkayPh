@@ -14,18 +14,29 @@ document.addEventListener("DOMContentLoaded", () => {
     .then(res => {
       if (!res.ok) throw new Error("Invalid or expired token");
       document.querySelector(".logout-btn").style.display = "none";
+      document.querySelector(".profile-btn").style.display = "none";
       return res.json();
     })
     .then(data => {
       if (data.user) {
         localStorage.setItem("user", JSON.stringify(data.user));
-        showLoginStatus(`Welcome back, ${data.user.username}!`);
+        showLoginStatus(`Welcome back, ${data.user.username}! You are a ${data.user.userType}. `);
         document.querySelector(".login-btn").style.display = "none";
         document.querySelector(".logout-btn").style.display = "inline-block";
-    
+        document.querySelector(".profile-btn").style.display = "inline-block";
+        document.querySelector(".register-btn").style.display = "none";
+        
+    if (data.user.userType === "shop") {
+    document.getElementById("add-product-btn").style.display = "inline-block";
+    document.querySelector(".ShopDetails-btn").style.display = "inline-block";
+  }
       } else {
         document.querySelector(".login-btn").style.display = "block";
         document.querySelector(".logout-btn").style.display = "none";
+        document.getElementById("add-product-btn").style.display = "none";
+        document.querySelector(".ShopDetails-btn").style.display = "none";
+        document.querySelector(".register-btn").style.display = "inline-block";
+        document.querySelector(".profile-btn").style.display = "none";
         throw new Error("No user returned");
         
       }
@@ -35,6 +46,9 @@ document.addEventListener("DOMContentLoaded", () => {
       localStorage.removeItem("token");
       localStorage.removeItem("user");
       document.querySelector(".logout-btn").style.display = "none";
+      document.getElementById("add-product-btn").style.display = "none";
+      document.querySelector(".ShopDetails-btn").style.display = "none";
+     
     });
   }
 });
@@ -61,17 +75,26 @@ function handleLogin() {
         localStorage.setItem("user", JSON.stringify(data.user));
   
         // Display success message on the page
-        showLoginStatus(`Welcome, ${data.user.username}! You are now logged in.`);
-        
+        showLoginStatus(`Welcome, ${data.user.username}! You are now logged in as a ${data.user.userType}.`);
+        document.querySelector(".profile-btn").style.display = "inline-block";
+          if (data.user.userType === "shop") {
+    document.getElementById("add-product-btn").style.display = "inline-block";
+    document.querySelector(".ShopDetails-btn").style.display = "inline-block";
+    
+  }
         // Optionally disable the login button
         document.querySelector(".login-btn").disabled = true;
       } else {
         alert("Login failed: Missing token or user data.");
+        const errorMessage = data.error || data.message || res.statusText;
+      alert("failed: " + (data.message || errorMessage));
       }
     })
     .catch(error => {
       console.error("Login error:", error);
       alert("Login error: " + error.message);
+      const errorMessage = data.error || data.message || res.statusText;
+      alert("failed: " + (data.message || errorMessage));
     });
   }
   
@@ -112,17 +135,28 @@ function submitRegister() {
     if (data.token && data.user) {
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
-      showLoginStatus(`Registered and logged in as ${data.user.username}`);
+      showLoginStatus(`Registered and logged in as ${data.user.username}. You are a ${data.user.userType}`);
       document.getElementById("register-dropdown").style.display = "none";
+      document.querySelector(".register-btn").style.display = "none";
       document.querySelector(".login-btn").style.display = "none";
       document.querySelector(".logout-btn").style.display = "inline-block";
+      document.querySelector(".profile-btn").style.display = "inline-block";
+      if (data.user.userType === "shop") {
+    document.getElementById("add-product-btn").style.display = "inline-block";
+    document.querySelector(".ShopDetails-btn").style.display = "inline-block";
+    
+  }
     } else {
       alert("Registration failed.");
+      const errorMessage = data.error || data.message || res.statusText;
+      alert("failed: " + (data.message || errorMessage));
     }
   })
   .catch(error => {
     console.error("Registration error:", error);
     alert("Error: " + error.message);
+    const errorMessage = data.error || data.message || res.statusText;
+      alert("failed: " + (data.message || errorMessage));
   });
 }
 
@@ -143,6 +177,10 @@ function handleLogout() {
     // Reset UI state
     document.querySelector(".logout-btn").style.display = "none";
     document.querySelector(".login-btn").style.display = "block";
+    document.getElementById("add-product-btn").style.display = "none";
+    document.querySelector(".ShopDetails-btn").style.display = "none";
+    document.querySelector(".profile-btn").style.display = "none";
+   document.querySelector(".register-btn").style.display = "inline-block";
   })
   .catch(error => console.error("Logout error:", error));
 }
@@ -177,10 +215,19 @@ function submitLogin() {
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
 
-      showLoginStatus(`Welcome, ${data.user.username}!`);
+      showLoginStatus(`Welcome, ${data.user.username}! You are a ${data.user.userType}.`);
       document.querySelector(".login-btn").style.display = "none";
       document.getElementById("login-dropdown").style.display = "none";
+      document.querySelector(".register-btn").style.display = "none";
       document.querySelector(".logout-btn").style.display = "block";
+      document.querySelector(".profile-btn").style.display = "inline-block";
+
+        if (data.user.userType === "shop") {
+    document.getElementById("add-product-btn").style.display = "inline-block";
+    document.querySelector(".ShopDetails-btn").style.display = "inline-block";
+   
+  }
+  
     } else {
       alert("Login failed.");
     }
@@ -188,6 +235,8 @@ function submitLogin() {
   .catch(error => {
     console.error("Login error:", error);
     alert("Login error: " + error.message);
+    const errorMessage = data.error || data.message || res.statusText;
+      alert("failed: " + (data.message || errorMessage));
   });
 }
 
@@ -236,7 +285,16 @@ function renderProducts(products) {
     card.className = "product-card";
 
     const img = document.createElement("img");
-    img.src = product.imagePath || "placeholder.jpg";
+let imageUrl = product.imagePath;
+if (imageUrl && imageUrl.includes("ucarecdn.com") && !imageUrl.includes("-/preview/")) {
+  imageUrl = imageUrl + "-/preview/600x800/"; // ✅ optimized version
+}
+
+
+    img.src = imageUrl || "placeholder.jpg";
+
+
+
     img.alt = product.name;
 
     const details = document.createElement("div");
@@ -370,6 +428,8 @@ function heartProduct(productId, buttonElement) {
       }
     } else {
       alert("Failed to like: " + (data.message || "Unknown error"));
+      const errorMessage = data.error || data.message || res.statusText;
+      alert("failed: " + (data.message || errorMessage));
     }
   })
   .catch(err => console.error("Like error:", err));
@@ -401,3 +461,264 @@ function showLoginModal() {
   loginModal.show();
 }
 
+function openAddProductModal() {
+  const modal = new bootstrap.Modal(document.getElementById('addProductModal'));
+  modal.show();
+}
+
+// --- helper: promisified File → base64 string -----------------------------
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);   // data:image/...;base64,XXXX
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+async function uploadImage(file, token) {
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("token", token); // if server expects token in body
+
+  const response = await fetch(`${API_BASE}/uploadPhoto`, {
+    method: "POST",
+    body: formData // ✅ Let browser set the multipart boundary
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || "Image upload failed.");
+  }
+
+  return data.imagePath || data.path || data.url; // Adjust based on server's response
+}
+
+
+async function submitAddProduct() {
+  const token = localStorage.getItem("token");
+  const name = document.getElementById("productName").value.trim();
+  const description = document.getElementById("Pdesc").value.trim();
+  const price = parseFloat(document.getElementById("productPrice").value);
+  const promo = parseFloat(document.getElementById("productPromo").value);
+  const quantity = parseInt(document.getElementById("productQty").value, 10);
+
+  if (!name || isNaN(price) || isNaN(quantity)) {
+    alert("Please complete all fields.");
+    return;
+  }
+
+  const widget = uploadcare.Widget('#uploadcare-input');
+  const file = widget.value();
+
+  if (!file) {
+    alert("Please upload an image.");
+    return;
+  }
+
+  try {
+    // Wait for Uploadcare to finish processing the file
+    const fileInfo = await file.promise(); // ✅ Wait for file upload to complete
+    const imageCDNUrl = fileInfo.cdnUrl;   // ✅ Get CDN-hosted image URL
+
+    const payload = {
+      productDetails: {
+        imagePath: imageCDNUrl,
+        name,
+        description,
+        promo,
+        price,
+        quantity
+      }
+    };
+
+    const response = await fetch(`${API_BASE}/addProduct`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || data.error || "Unknown error");
+    }
+
+    alert("✅ Product added!");
+    document.getElementById("add-product-form").reset();
+    bootstrap.Modal.getInstance(document.getElementById("addProductModal")).hide();
+    loadProducts();
+  } catch (err) {
+    console.error("Add product error:", err);
+    alert("Failed: " + err.message);
+  }
+}
+
+function openProfileModal() {
+  const token = localStorage.getItem("token");
+  if (!token) return alert("Login required");
+
+  fetch(`${API_BASE}/getProfile`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify({})
+  })
+  .then(res => res.json())
+  .then(data => {
+    const profile = data.profile || {};
+
+
+    const widget = uploadcare.Widget('#uploadcare-inputProfilePic');
+
+  const imageUrl = profile.imagePath || "";
+document.getElementById("profile-image").value = imageUrl;
+
+const preview = document.getElementById("profile-image-preview");
+
+if (imageUrl) {
+  preview.src = imageUrl;
+  preview.style.display = "block";
+} else {
+  preview.style.display = "none";
+}
+
+
+widget.onUploadComplete((info) => {
+  const url = info.cdnUrl + "-/preview/200x200/";
+  document.getElementById("profile-image").value = url;
+  const preview = document.getElementById("profile-image-preview");
+  preview.src = url;
+  preview.style.display = "block";
+});
+
+    document.getElementById("uploadcare-inputProfilePic").value = profile.file || "";
+    document.getElementById("profile-firstName").value = profile.firstName || "";
+    document.getElementById("profile-middleName").value = profile.middleName || "";
+    document.getElementById("profile-lastName").value = profile.lastName || "";
+    document.getElementById("profile-email").value = profile.email || "";
+    document.getElementById("profile-shop").value = profile.shopName || "";
+    document.getElementById("profile-mobile").value = profile.phone_no || "";
+    document.getElementById("profile-address").value = profile.address || "";
+
+    document.getElementById("profile-success").style.display = "none";
+    const modal = new bootstrap.Modal(document.getElementById("profileModal"));
+    modal.show();
+  })
+  .catch(err => {
+    console.error("Profile fetch error:", err);
+    alert("Failed to fetch profile.");
+    const errorMessage = data.error || data.message || res.statusText;
+      alert("failed: " + (data.message || errorMessage));
+  });
+}
+
+function submitProfileUpdate() {
+  const token = localStorage.getItem("token");
+
+  const payload = {
+    profile: {
+      imagePath: document.getElementById("uploadcare-inputProfilePic").value.trim(),
+      firstName: document.getElementById("profile-firstName").value.trim(),
+      middleName: document.getElementById("profile-middleName").value.trim(),
+      lastName: document.getElementById("profile-lastName").value.trim(),
+      email: document.getElementById("profile-email").value.trim(),
+      shopName: document.getElementById("profile-shop").value.trim(),
+      phone_no: document.getElementById("profile-mobile").value.trim(),
+      shopName: document.getElementById("profile-shop").value.trim(),
+      address: document.getElementById("profile-address").value.trim()
+    }
+  };
+
+  fetch(`${API_BASE}/updateProfile`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify(payload)
+  })
+  .then(async (res) => {
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.message || data.error || "Unknown error");
+    }
+
+    document.getElementById("profile-success").style.display = "block";
+    loadProducts();  // ✅ now this will run without breaking
+  })
+  .catch(err => {
+    console.error("Update error:", err);
+    alert("Profile update failed: " + err.message);
+  });
+}
+
+function openShopDetailsModal() {
+  const token = localStorage.getItem("token");
+  if (!token) return alert("Login required");
+
+  fetch(`${API_BASE}/getAddresses`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify({})
+  })
+  .then(res => res.json())
+  .then(data => {
+    const shopDetails = data.address || {};
+
+    document.getElementById("ShopDetails_name").value = shopDetails.label || "";
+    document.getElementById("ShopDetails_AddressCity").value = shopDetails.location || "";
+    document.getElementById("ShopDetails_AddressBarangay").value = shopDetails.barangay || "";
+
+    document.getElementById("ShopDetails-success").style.display = "none";
+    const modal = new bootstrap.Modal(document.getElementById("ShopDetailsModal"));
+    modal.show();
+  })
+  .catch(err => {
+    console.error("Shop details fetch error:", err);
+    alert("Failed to fetch shop details: " + err.message);
+  });
+}
+
+function submitShopDetailsUpdate() {
+  const token = localStorage.getItem("token");
+
+  const payload = {
+    address: {
+      label: document.getElementById("ShopDetails_name").value.trim(),
+      location: document.getElementById("ShopDetails_AddressCity").value.trim(),
+      barangay: document.getElementById("ShopDetails_AddressBarangay").value.trim()
+    }
+  };
+
+  fetch(`${API_BASE}/addAddress`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify(payload)
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      document.getElementById("ShopDetails-success").style.display = "block";
+    } else {
+      throw new Error(data.message || "Unknown error");
+    }
+  })
+  .catch(err => {
+    console.error("Shop details update error:", err);
+    alert("Failed to update shop details: " + err.message);
+  });
+}
