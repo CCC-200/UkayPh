@@ -128,7 +128,7 @@
     </div>
   </main>
  
-  <div id="product-list" class="product-grid"></div>
+  
 
   
   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
@@ -283,31 +283,48 @@
 
 
 <div class="modal fade" id="ShopDetailsModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
     <div class="modal-content rounded-4">
       <div class="modal-header">
-        <h5 class="modal-title">My Shop Details</h5>
+        <h5 class="modal-title">My Shop Addresses</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
-        <form id="ShopDetails-form">
-          <div class="mb-2">
-            <label class="form-label">Shop Name</label>
-            <input type="text" class="form-control" id="ShopDetails_name" placeholder="Not set, set now!" />
-          </div>
-          <div class="mb-2">
-            <label class="form-label">City</label>
-            <input type="text" class="form-control" id="ShopDetails_AddressCity" placeholder="Not set, set now!" />
-          </div>
-          <div class="mb-2">
-            <label class="form-label">Barangay</label>
-            <input type="text" class="form-control" id="ShopDetails_AddressBarangay" placeholder="Not set, set now!" />
-          </div>
-          <div class="mt-3 text-end">
-            <button type="button" class="btn btn-primary" onclick="submitShopDetailsUpdate()">Update</button>
-          </div>
-        </form>
-        <div id="ShopDetails-success" class="text-success mt-3" style="display: none;">✅ Shop Details successfully updated!</div>
+        
+        <!-- Dynamic Address List -->
+        <div id="shop-address-list" class="mb-4">
+          <!-- Existing addresses will be appended here -->
+        </div>
+
+        <hr>
+
+        <!-- New Address Form -->
+       <form id="ShopDetails-form">
+  <h6>Add New Address</h6>
+  <div class="mb-2">
+    <label class="form-label">Address Name</label>
+    <input type="text" class="form-control" id="ShopDetails_name" placeholder="e.g. Main Store" />
+  </div>
+  <div class="mb-2">
+    <label class="form-label">Barangay</label>
+    <input type="text" class="form-control" id="ShopDetails_Barangay" placeholder="e.g. Tubod" />
+  </div>
+  <div class="mb-2">
+    <label class="form-label">Street Address</label>
+    <input type="text" class="form-control" id="ShopDetails_Street" placeholder="e.g. San Miguel St." />
+  </div>
+  <div class="mb-2">
+    <label class="form-label">Landmark</label>
+    <input type="text" class="form-control" id="ShopDetails_Landmark" placeholder="e.g. Beside 7-Eleven" />
+  </div>
+  <div class="text-end mt-3">
+    <button type="button" class="btn btn-primary" onclick="submitShopDetailsUpdate()">Add Address</button>
+  </div>
+</form>
+
+        <div id="ShopDetails-success" class="text-success mt-3" style="display: none;">
+          ✅ Address successfully added!
+        </div>
       </div>
     </div>
   </div>

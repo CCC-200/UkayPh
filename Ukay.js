@@ -193,7 +193,21 @@ function handleLogout() {
     document.querySelector(".ShopDetails-btn").style.display = "none";
     document.querySelector(".profile-btn").style.display = "none";
    document.querySelector(".register-btn").style.display = "inline-block";
+
+// 🔄 Clear like state memory
+Object.keys(likedProducts).forEach(key => delete likedProducts[key]);
+
+// 🔁 Reset all heart icons to "unliked" (outline) but keep like counts
+document.querySelectorAll(".product-card button").forEach(btn => {
+  if (btn.innerHTML.includes("❤️") || btn.innerHTML.includes("🤍")) {
+    const count = btn.querySelector(".like-count")?.textContent || "0";
+    btn.innerHTML = `🤍 <span class="like-count">${count}</span>`;
+  }
+});
+   loadProducts();
   })
+
+  
   .catch(error => console.error("Logout error:", error));
 }
 
@@ -336,8 +350,9 @@ if (imageUrl && imageUrl.includes("ucarecdn.com") && !imageUrl.includes("-/previ
 
     const likeBtn = document.createElement("button");
     likeBtn.className = "btn btn-outline-danger btn-sm me-2";
-    likeBtn.innerHTML = `❤️ ${product.likes || 0}`;
-    likeBtn.onclick = () => heartProduct(product.id);
+    const heartIcon = likedProducts[product.id] ? "❤️" : "🤍";
+likeBtn.innerHTML = `${heartIcon} <span class="like-count">${product.likes || 0}</span>`;
+   likeBtn.onclick = () => heartProduct(product.id, likeBtn);
 
     const cartBtn = document.createElement("button");
     cartBtn.className = "btn btn-outline-primary btn-sm";
@@ -417,12 +432,15 @@ function clearSearch() {
   applyFilters();
 }
 
-
+const likedProducts = {};  // productId -> true/false
 function heartProduct(productId, buttonElement) {
   if (!isLoggedIn()) {
     showLoginModal();
     return;
   }
+
+  const currentLiked = likedProducts[productId] || false;
+  const newLiked = !currentLiked; // toggle like
 
   fetch(`${API_BASE}/like`, {
     method: "POST",
@@ -430,25 +448,44 @@ function heartProduct(productId, buttonElement) {
       "Content-Type": "application/json",
       Authorization: `Bearer ${localStorage.getItem("token")}`
     },
-    body: JSON.stringify({ productId })
+    body: JSON.stringify({
+      product_id: productId,
+      like: newLiked
+    })
   })
   .then(res => res.json())
   .then(data => {
-    if (data.success) {
-      // Find the span showing like count in this product card
+    if (data.product) {
+      // ✅ Update local state
+      likedProducts[productId] = newLiked;
+const heartIcon = newLiked ? "❤️" : "🤍";
+buttonElement.innerHTML = `${heartIcon} <span class="like-count">${data.product.likes}</span>`;
+      // ✅ Update UI
+      const likeCount = data.product.likes;
       const likeCountSpan = buttonElement.querySelector(".like-count");
+
       if (likeCountSpan) {
-        const current = parseInt(likeCountSpan.textContent, 10);
-        likeCountSpan.textContent = current + 1;
+        likeCountSpan.textContent = likeCount;
+      }
+
+      // Optionally: toggle button color/text if you want more visual feedback
+      if (newLiked) {
+        buttonElement.classList.add("btn-danger");
+        buttonElement.classList.remove("btn-outline-danger");
+      } else {
+        buttonElement.classList.remove("btn-danger");
+        buttonElement.classList.add("btn-outline-danger");
       }
     } else {
-      alert("Failed to like: " + (data.message || "Unknown error"));
-      const errorMessage = data.error || data.message || res.statusText;
-      alert("failed: " + (data.message || errorMessage));
+      alert("Failed to update like: " + (data.message || "Unknown error"));
     }
   })
-  .catch(err => console.error("Like error:", err));
+  .catch(err => {
+    console.error("Like toggle error:", err);
+    alert("Request failed: " + err.message);
+  });
 }
+
 
 function addToCart(productId) {
   if (!isLoggedIn()) {
@@ -681,9 +718,8 @@ function submitProfileUpdate() {
   });
 }
 
-function openShopDetailsModal() {
+function loadShopAddresses() {
   const token = localStorage.getItem("token");
-  if (!token) return alert("Login required");
 
   fetch(`${API_BASE}/getAddresses`, {
     method: "POST",
@@ -695,20 +731,48 @@ function openShopDetailsModal() {
   })
   .then(res => res.json())
   .then(data => {
-    const shopDetails = data.address || {};
+    const addressList = data.addresses || [];
+    const container = document.getElementById("shop-address-list");
+    container.innerHTML = "";
 
-    document.getElementById("ShopDetails_name").value = shopDetails.label || "";
-    document.getElementById("ShopDetails_AddressCity").value = shopDetails.location || "";
-    document.getElementById("ShopDetails_AddressBarangay").value = shopDetails.barangay || "";
+    if (addressList.length === 0) {
+      container.innerHTML = `<p class="text-muted">No addresses added yet.</p>`;
+    } else {
+      addressList.forEach((addr, index) => {
+        const isDefault = addr.default === true;
+        const badge = isDefault ? `<span class="badge bg-success ms-2">Default</span>` : "";
 
-    document.getElementById("ShopDetails-success").style.display = "none";
-    const modal = new bootstrap.Modal(document.getElementById("ShopDetailsModal"));
-    modal.show();
+        const card = document.createElement("div");
+        card.className = "card mb-2";
+        card.innerHTML = `
+          <div class="card-body">
+            <h6 class="card-title">${addr.name || "Address " + (index + 1)} ${badge}</h6>
+            <p class="mb-0"><strong>Barangay:</strong> ${addr.barangay || "—"}</p>
+            <p class="mb-0"><strong>Street:</strong> ${addr.streetAddress || "—"}</p>
+            <p class="mb-3"><strong>Landmark:</strong> ${addr.landmark || "—"}</p>
+            <div class="d-flex gap-2">
+              ${!isDefault ? `<button class="btn btn-sm btn-outline-primary" onclick="setAsDefaultAddress('${addr.id}')">Set as Default</button>` : ""}
+              <button class="btn btn-sm btn-outline-danger" onclick="deleteAddress('${addr.id}')">Delete</button>
+            </div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
   })
   .catch(err => {
-    console.error("Shop details fetch error:", err);
-    alert("Failed to fetch shop details: " + err.message);
+    console.error("Address fetch error:", err);
+    alert("Failed to load addresses: " + err.message);
   });
+}
+
+function openShopDetailsModal() {
+  document.getElementById("ShopDetails-success").style.display = "none";
+
+  const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById("ShopDetailsModal"));
+  modal.show();
+
+  loadShopAddresses(); // ✅ just load data inside
 }
 
 function submitShopDetailsUpdate() {
@@ -716,9 +780,10 @@ function submitShopDetailsUpdate() {
 
   const payload = {
     address: {
-      label: document.getElementById("ShopDetails_name").value.trim(),
-      location: document.getElementById("ShopDetails_AddressCity").value.trim(),
-      barangay: document.getElementById("ShopDetails_AddressBarangay").value.trim()
+      name: document.getElementById("ShopDetails_name").value.trim(),
+      barangay: document.getElementById("ShopDetails_Barangay").value.trim(),
+      streetAddress: document.getElementById("ShopDetails_Street").value.trim(),
+      landmark: document.getElementById("ShopDetails_Landmark").value.trim()
     }
   };
 
@@ -730,16 +795,135 @@ function submitShopDetailsUpdate() {
     },
     body: JSON.stringify(payload)
   })
+  .then(async res => {
+    const data = await res.json();
+
+    if (!res.ok) throw new Error(data.message || data.error || "Unknown error");
+
+    document.getElementById("ShopDetails-success").style.display = "block";
+    document.getElementById("ShopDetails-form").reset();
+
+    loadShopAddresses(); // ✅ refresh contents without re-showing modal
+  })
+  .catch(err => {
+    console.error("Add address error:", err);
+    alert("Failed to add address: " + err.message);
+  });
+}
+
+function submitShopDetailsUpdate() {
+  const token = localStorage.getItem("token");
+
+  const payload = {
+    address: {
+      name: document.getElementById("ShopDetails_name").value.trim(),
+      barangay: document.getElementById("ShopDetails_Barangay").value.trim(),
+      streetAddress: document.getElementById("ShopDetails_Street").value.trim(),
+      landmark: document.getElementById("ShopDetails_Landmark").value.trim()
+    }
+  };
+
+  fetch(`${API_BASE}/addAddress`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify(payload)
+  })
+  .then(async res => {
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.message || data.error || "Unknown error");
+    }
+
+    document.getElementById("ShopDetails-success").style.display = "block";
+    document.getElementById("ShopDetails-form").reset();
+    openShopDetailsModal(); // refresh the updated list
+  })
+  .catch(err => {
+    console.error("Add address error:", err);
+    alert("Failed to add address: " + err.message);
+  });
+}
+
+function setAsDefaultAddress(targetId) {
+  const token = localStorage.getItem("token");
+
+  fetch(`${API_BASE}/getAddresses`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify({})
+  })
+  .then(res => res.json())
+  .then(data => {
+    const updatedAddresses = (data.addresses || []).map(addr => ({
+      ...addr,
+      default: addr.id === targetId // set true for selected
+    }));
+
+    return fetch(`${API_BASE}/addAddress`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify({ addresses: updatedAddresses })
+    });
+  })
   .then(res => res.json())
   .then(data => {
     if (data.success) {
-      document.getElementById("ShopDetails-success").style.display = "block";
+      openShopDetailsModal(); // refresh list
     } else {
-      throw new Error(data.message || "Unknown error");
+      alert("Failed to update default address.");
     }
   })
   .catch(err => {
-    console.error("Shop details update error:", err);
-    alert("Failed to update shop details: " + err.message);
+    console.error("Set default error:", err);
+    alert("Error: " + err.message);
+  });
+}
+function deleteAddress(targetId) {
+  if (!confirm("Delete this address?")) return;
+
+  const token = localStorage.getItem("token");
+
+  fetch(`${API_BASE}/getAddresses`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify({})
+  })
+  .then(res => res.json())
+  .then(data => {
+    const remaining = (data.addresses || []).filter(addr => addr.id !== targetId);
+
+    return fetch(`${API_BASE}/addAddress`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify({ addresses: remaining })
+    });
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      openShopDetailsModal(); // refresh
+    } else {
+      alert("Delete failed.");
+    }
+  })
+  .catch(err => {
+    console.error("Delete error:", err);
+    alert("Error: " + err.message);
   });
 }
