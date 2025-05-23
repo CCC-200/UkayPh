@@ -21,6 +21,9 @@
         <button class="logout-btn" onclick="handleLogout()" style="display: none;">Logout</button>
         <button class="btn btn-warning profile-btn" onclick="openProfileModal()" style="display: none;">My Profile</button>
         <button class="btn btn-warning ShopDetails-btn" onclick="openShopDetailsModal()" style="display: none;">My Shop</button>
+        <button class="btn btn-info ms-2" id="my-orders-btn" onclick="openOrdersModal() " style="display: none;">My Orders</button>
+        <button class="btn btn-secondary" id="customer-address-btn" onclick="openCustomerAddressModal()" style="display: none;">My Address</button>
+       <button class="btn btn-success" id="osy-orders-btn" onclick="openOsyOrdersModal()" style="display: none;"> My Orders</button>
         <div class="button-row">
           <button id="add-product-btn" class="btn btn-success" style="display: none;" onclick="openAddProductModal()">+ Add Product</button>
           <div class="dropdown">
@@ -40,7 +43,7 @@
                 <option value="">Select user type</option>
                 <option value="shop">Shop</option>
                 <option value="customer">Customer</option>
-                <option value="delivery">Delivery</option>
+                <option value="delivery">OSY Partner</option>
               </select>
               <button onclick="submitRegister()">Register</button>
             </div>
@@ -329,6 +332,111 @@
     </div>
   </div>
 </div>
+
+
+<div class="modal fade" id="cartModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg">
+    <div class="modal-content rounded-4">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="bi bi-cart4 me-2"></i>Your Cart</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div id="cart-items"></div>
+        <p class="mt-3 fw-bold" id="cart-total">Total: ₱0.00</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+        <button class="btn btn-success" onclick="checkoutCart()">Checkout</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal fade" id="ordersModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content rounded-4">
+      <div class="modal-header">
+        <h5 class="modal-title">My Orders</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div id="orders-list" class="list-group">
+          <p class="text-muted">Loading your orders...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal fade" id="customerAddressModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content rounded-4">
+      <div class="modal-header">
+        <h5 class="modal-title">My Delivery Addresses</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div id="customer-address-list" class="mb-4"></div>
+
+        <hr>
+
+        <form id="customerAddress-form">
+          <h6>Add New Address</h6>
+          <div class="mb-2">
+            <label class="form-label">Name</label>
+            <input type="text" class="form-control" id="custAddr_name" />
+          </div>
+          <div class="mb-2">
+            <label class="form-label">Barangay</label>
+            <input type="text" class="form-control" id="custAddr_barangay" />
+          </div>
+          <div class="mb-2">
+            <label class="form-label">Street</label>
+            <input type="text" class="form-control" id="custAddr_street" />
+          </div>
+          <div class="mb-2">
+            <label class="form-label">Landmark</label>
+            <input type="text" class="form-control" id="custAddr_landmark" />
+          </div>
+          <div class="text-end">
+            <button type="button" class="btn btn-primary" onclick="submitCustomerAddress()">Add Address</button>
+          </div>
+        </form>
+
+        <div id="customer-address-success" class="text-success mt-3" style="display: none;">
+          ✅ Address successfully added!
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="osyOrdersModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <div class="modal-content rounded-4">
+      <div class="modal-header">
+        <h5 class="modal-title">Delivery Orders</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-md-6 border-end">
+            <h6>📬 Available Orders</h6>
+            <div id="osy-available-orders" class="mt-2"></div>
+          </div>
+          <div class="col-md-6">
+            <h6>✅ My Accepted Orders</h6>
+            <div id="osy-my-orders" class="mt-2"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 
 </body>
 </html>
