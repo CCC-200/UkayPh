@@ -32,6 +32,7 @@ document.addEventListener("DOMContentLoaded", () => {
       document.getElementById("customer-address-btn").style.display = "none";
     document.getElementById("add-product-btn").style.display = "inline-block";
     document.querySelector(".ShopDetails-btn").style.display = "inline-block";
+     document.getElementById("seller-orders-btn").style.display = "inline-block";
   }
   if (data.user.userType === "customer") {
       document.getElementById("cart-icon").style.display = "inline-block";
@@ -78,7 +79,7 @@ function handleLogin() {
       body: JSON.stringify({ username, password })
     })
     .then(response => {
-      if (!response.ok) throw new Error("Network response was not ok");
+      if (!response.ok) throw new Error("Error: User Exists/Network error");
       return response.json();
     })
     .then(data => {
@@ -96,21 +97,20 @@ function handleLogin() {
       document.getElementById("customer-address-btn").style.display = "none";
     document.getElementById("add-product-btn").style.display = "inline-block";
     document.querySelector(".ShopDetails-btn").style.display = "inline-block";
+     document.getElementById("seller-orders-btn").style.display = "inline-block";
     
   }
         // Optionally disable the login button
         document.querySelector(".login-btn").disabled = true;
       } else {
         alert("Login failed: Missing token or user data.");
-        const errorMessage = data.error || data.message || res.statusText;
-      alert("failed: " + (data.message || errorMessage));
+      
       }
     })
     .catch(error => {
       console.error("Login error:", error);
       alert("Login error: " + error.message);
-      const errorMessage = data.error || data.message || res.statusText;
-      alert("failed: " + (data.message || errorMessage));
+  
     });
     if (data.user.userType === "customer") {
       document.getElementById("cart-icon").style.display = "inline-block";
@@ -172,6 +172,7 @@ function submitRegister() {
       document.getElementById("customer-address-btn").style.display = "none";
     document.getElementById("add-product-btn").style.display = "inline-block";
     document.querySelector(".ShopDetails-btn").style.display = "inline-block";
+     document.getElementById("seller-orders-btn").style.display = "inline-block";
     
   }if (data.user.userType === "customer") {
       document.getElementById("cart-icon").style.display = "inline-block";
@@ -183,15 +184,13 @@ function submitRegister() {
 }
     } else {
       alert("Registration failed.");
-      const errorMessage = data.error || data.message || res.statusText;
-      alert("failed: " + (data.message || errorMessage));
+    
     }
   })
   .catch(error => {
     console.error("Registration error:", error);
     alert("Error: " + error.message);
-    const errorMessage = data.error || data.message || res.statusText;
-      alert("failed: " + (data.message || errorMessage));
+  
   });
 }
 
@@ -219,6 +218,7 @@ function handleLogout() {
        document.getElementById("my-orders-btn").style.display = "none";
       document.getElementById("customer-address-btn").style.display = "none";
       document.getElementById("osy-orders-btn").style.display = "none";
+       document.getElementById("seller-orders-btn").style.display = "none";
 
 // 🔄 Clear like state memory
 Object.keys(likedProducts).forEach(key => delete likedProducts[key]);
@@ -261,7 +261,7 @@ function submitLogin() {
     body: JSON.stringify({ username, password })
   })
   .then(response => {
-    if (!response.ok) throw new Error("Network response was not ok");
+    if (!response.ok) throw new Error("Check credentials");
     return response.json();
   })
   .then(data => {
@@ -282,6 +282,7 @@ function submitLogin() {
       document.getElementById("customer-address-btn").style.display = "none";
     document.getElementById("add-product-btn").style.display = "inline-block";
     document.querySelector(".ShopDetails-btn").style.display = "inline-block";
+     document.getElementById("seller-orders-btn").style.display = "inline-block";
    
   }if (data.user.userType === "customer") {
       document.getElementById("cart-icon").style.display = "inline-block";
@@ -299,8 +300,7 @@ function submitLogin() {
   .catch(error => {
     console.error("Login error:", error);
     alert("Login error: " + error.message);
-    const errorMessage = data.error || data.message || res.statusText;
-      alert("failed: " + (data.message || errorMessage));
+  
   });
 }
 
@@ -832,6 +832,8 @@ async function submitAddProduct() {
 
 function openProfileModal() {
   const token = localStorage.getItem("token");
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+
   if (!token) return alert("Login required");
 
   fetch(`${API_BASE}/getProfile`, {
@@ -846,48 +848,50 @@ function openProfileModal() {
   .then(data => {
     const profile = data.profile || {};
 
-
     const widget = uploadcare.Widget('#uploadcare-inputProfilePic');
+    const imageUrl = profile.imagePath || "";
+    document.getElementById("profile-image").value = imageUrl;
 
-  const imageUrl = profile.imagePath || "";
-document.getElementById("profile-image").value = imageUrl;
+    const preview = document.getElementById("profile-image-preview");
+    if (imageUrl) {
+      preview.src = imageUrl;
+      preview.style.display = "block";
+    } else {
+      preview.style.display = "none";
+    }
 
-const preview = document.getElementById("profile-image-preview");
-
-if (imageUrl) {
-  preview.src = imageUrl;
-  preview.style.display = "block";
-} else {
-  preview.style.display = "none";
-}
-
-
-widget.onUploadComplete((info) => {
-  const url = info.cdnUrl + "-/preview/200x200/";
-  document.getElementById("profile-image").value = url;
-  const preview = document.getElementById("profile-image-preview");
-  preview.src = url;
-  preview.style.display = "block";
-});
+    widget.onUploadComplete((info) => {
+      const url = info.cdnUrl + "-/preview/200x200/";
+      document.getElementById("profile-image").value = url;
+      preview.src = url;
+      preview.style.display = "block";
+    });
 
     document.getElementById("uploadcare-inputProfilePic").value = profile.file || "";
     document.getElementById("profile-firstName").value = profile.firstName || "";
     document.getElementById("profile-middleName").value = profile.middleName || "";
     document.getElementById("profile-lastName").value = profile.lastName || "";
     document.getElementById("profile-email").value = profile.email || "";
-    document.getElementById("profile-shop").value = profile.shopName || "";
     document.getElementById("profile-mobile").value = profile.phone_no || "";
     document.getElementById("profile-address").value = profile.address || "";
 
+    // ✅ Show/hide shop input group based on userType
+    const shopField = document.getElementById("profile-shop-group");
+    if (user.userType === "shop") {
+      document.getElementById("profile-shop").value = profile.shopName || "";
+      shopField.style.display = "block";
+    } else {
+      shopField.style.display = "none";
+    }
+
     document.getElementById("profile-success").style.display = "none";
+
     const modal = new bootstrap.Modal(document.getElementById("profileModal"));
     modal.show();
   })
   .catch(err => {
     console.error("Profile fetch error:", err);
     alert("Failed to fetch profile.");
-    const errorMessage = data.error || data.message || res.statusText;
-      alert("failed: " + (data.message || errorMessage));
   });
 }
 
@@ -1174,18 +1178,26 @@ function openOrdersModal() {
       const item = document.createElement("div");
       item.className = "list-group-item";
 
-      const status = `<span class="badge bg-secondary">${order.status}</span>`;
-
+      const status = order.status?.toLowerCase() || "unknown";
+      const statusBadge = `<span class="badge bg-secondary text-capitalize">${status}</span>`;
       const productSummary = order.products?.map(p => p.name).join(", ") || "No products";
+
+      let actionButtons = "";
+
+      if (status === "pending") {
+        actionButtons = `<button class="btn btn-sm btn-danger" onclick="cancelOrder('${order.id}')">Cancel</button>`;
+      } else if (status === "deployed") {
+        actionButtons = `<button class="btn btn-sm btn-success" onclick="confirmReceive('${order.id}')">Confirm Delivery</button>`;
+      }
 
       item.innerHTML = `
         <div class="d-flex justify-content-between align-items-center">
           <div>
             <strong>Order ID:</strong> ${order.id}<br>
             <strong>Items:</strong> ${productSummary}<br>
-            <strong>Status:</strong> ${status}
+            <strong>Status:</strong> ${statusBadge}
           </div>
-          ${order.status === "Pending" ? `<button class="btn btn-sm btn-danger" onclick="cancelOrder('${order.id}')">Cancel</button>` : ""}
+          <div>${actionButtons}</div>
         </div>
       `;
 
@@ -1195,6 +1207,34 @@ function openOrdersModal() {
   .catch(err => {
     console.error("Get orders error:", err);
     list.innerHTML = "<p class='text-danger'>Failed to load orders.</p>";
+  });
+}
+
+function confirmReceive(orderId) {
+  if (!confirm("Mark this order as received?")) return;
+
+  const token = localStorage.getItem("token");
+
+  fetch(`${API_BASE}/receiveOrder`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify({ order_id: orderId })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success || data.order) {
+      alert("✅ Order marked as received.");
+      openOrdersModal(); // refresh
+    } else {
+      alert("Failed to confirm: " + (data.message || "Unknown error"));
+    }
+  })
+  .catch(err => {
+    console.error("Confirm receive error:", err);
+    alert("Error: " + err.message);
   });
 }
 
@@ -1328,28 +1368,50 @@ function openOsyOrdersModal() {
 function loadOsyOrders() {
   const token = localStorage.getItem("token");
 
-  fetch(`${API_BASE}/getDeployedOrders`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`
-    },
-    body: JSON.stringify({})
-  })
-  .then(res => res.json())
-  .then(data => {
-    const availableContainer = document.getElementById("osy-available-orders");
-    const acceptedContainer = document.getElementById("osy-my-orders");
+  // Clear both containers initially
+  const availableContainer = document.getElementById("osy-available-orders");
+  const acceptedContainer = document.getElementById("osy-my-orders");
+  availableContainer.innerHTML = "<p>Loading available orders...</p>";
+  acceptedContainer.innerHTML = "<p>Loading your accepted orders...</p>";
 
-    const orders = data.orders || [];
+  // Fetch user profile from localStorage (previously stored on login)
+  const user = JSON.parse(localStorage.getItem("user"));
+  const userId = user?.profile?.user_id;
 
-    // Split orders into accepted and available
-    const available = orders.filter(o => !o.delivery_id);
-    const accepted = orders.filter(o => o.delivery_id); // assuming this field is filled when accepted
+  // Call both APIs
+  Promise.all([
+    fetch(`${API_BASE}/getDeployedOrders`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify({})
+    }).then(res => res.json()),
 
+    fetch(`${API_BASE}/getOrders`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify({})
+    }).then(res => res.json())
+  ])
+  .then(([deployedData, acceptedData]) => {
+    // Filter both datasets
+    const available = (deployedData.orders || []).filter(o =>
+      (!o.delivery_id || o.delivery_id === null) &&
+      o.status?.toLowerCase() === "deployed"
+    );
+
+    const accepted = (acceptedData.orders || []).filter(o =>
+      o.delivery_id === userId &&
+      (o.status?.toLowerCase() === "accepted" || o.status?.toLowerCase() === "deployed")
+    );
+
+    // Render Available Orders
     availableContainer.innerHTML = "";
-    acceptedContainer.innerHTML = "";
-
     if (available.length === 0) {
       availableContainer.innerHTML = "<p class='text-muted'>No available orders.</p>";
     } else {
@@ -1367,6 +1429,8 @@ function loadOsyOrders() {
       });
     }
 
+    // Render Accepted Orders
+    acceptedContainer.innerHTML = "";
     if (accepted.length === 0) {
       acceptedContainer.innerHTML = "<p class='text-muted'>You haven't accepted any orders.</p>";
     } else {
@@ -1385,13 +1449,17 @@ function loadOsyOrders() {
     }
   })
   .catch(err => {
-    console.error("Load OSY orders error:", err);
-    document.getElementById("osy-available-orders").innerHTML = "<p class='text-danger'>Failed to load orders.</p>";
+    console.error("Error loading OSY orders:", err);
+    availableContainer.innerHTML = "<p class='text-danger'>Failed to load available orders.</p>";
+    acceptedContainer.innerHTML = "<p class='text-danger'>Failed to load accepted orders.</p>";
   });
 }
 
+
 function acceptOsyOrder(orderId) {
   const token = localStorage.getItem("token");
+
+  console.log("Accepting order ID:", orderId);
 
   fetch(`${API_BASE}/acceptOrder`, {
     method: "POST",
@@ -1403,15 +1471,154 @@ function acceptOsyOrder(orderId) {
   })
   .then(res => res.json())
   .then(data => {
-    if (data.success || data.order) {
-      alert("Order accepted.");
-      loadOsyOrders(); // refresh both columns
+  
+      if (data.error) {
+      // 🚫 Show error if present in response
+      alert("❌ Failed to accept order: " + data.error);
     } else {
-      alert("Failed to accept order: " + (data.message || "Unknown error"));
+      alert("✅ Order accepted.");
+      loadOsyOrders(); // refresh orders
     }
   })
   .catch(err => {
     console.error("Accept order error:", err);
-    alert("Failed: " + err.message);
+    alert("Error: " + err);
+  });
+}
+
+
+function openSellerOrdersModal() {
+  const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById("sellerOrdersModal"));
+  modal.show();
+  loadSellerOrders();
+}
+function loadSellerOrders() {
+  const token = localStorage.getItem("token");
+
+  fetch(`${API_BASE}/getOrders`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify({})
+  })
+  .then(res => res.json())
+  .then(data => {
+    const pendingContainer = document.getElementById("seller-pending-orders");
+    const deployedContainer = document.getElementById("seller-deployed-orders");
+
+    const orders = data.orders || [];
+
+    // Normalize status to lowercase
+    const pending = orders.filter(o => o.status?.toLowerCase() === "pending");
+    const active = orders.filter(o => {
+      const status = o.status?.toLowerCase();
+      return status === "accepted" || status === "deployed";
+    });
+
+    pendingContainer.innerHTML = "";
+    deployedContainer.innerHTML = "";
+
+    // Pending orders with Accept/Reject buttons
+    if (pending.length === 0) {
+      pendingContainer.innerHTML = "<p class='text-muted'>No pending orders.</p>";
+    } else {
+      pending.forEach(order => {
+        const card = document.createElement("div");
+        card.className = "card mb-2";
+        card.innerHTML = `
+          <div class="card-body">
+            <strong>Order ID:</strong> ${order.id}<br>
+            <strong>Customer:</strong> ${order.customer?.firstName || "N/A"} ${order.customer?.lastName || ""}<br>
+            <strong>Barangay:</strong> ${order.address?.barangay || "—"}<br>
+            <div class="mt-2 d-flex gap-2">
+              <button class="btn btn-sm btn-success" onclick="deployOrder('${order.id}')">Accept</button>
+              <button class="btn btn-sm btn-danger" onclick="rejectOrder('${order.id}')">Reject</button>
+            </div>
+          </div>
+        `;
+        pendingContainer.appendChild(card);
+      });
+    }
+
+    // Accepted or Deployed orders
+    if (active.length === 0) {
+      deployedContainer.innerHTML = "<p class='text-muted'>No active orders.</p>";
+    } else {
+      active.forEach(order => {
+        const statusBadge = order.status?.toLowerCase() === "deployed"
+          ? `<span class="badge bg-success">${order.status}</span>`
+          : `<span class="badge bg-info">${order.status}</span>`;
+
+        const card = document.createElement("div");
+        card.className = "card mb-2";
+        card.innerHTML = `
+          <div class="card-body">
+            <strong>Order ID:</strong> ${order.id}<br>
+            <strong>Status:</strong> ${statusBadge}<br>
+            <strong>To:</strong> ${order.address?.barangay || "—"}
+          </div>
+        `;
+        deployedContainer.appendChild(card);
+      });
+    }
+  })
+  .catch(err => {
+    console.error("Seller orders load error:", err);
+    document.getElementById("seller-pending-orders").innerHTML = "<p class='text-danger'>Failed to load orders.</p>";
+  });
+}
+
+//seller accept order acceptorder
+function deployOrder(orderId) {
+  const token = localStorage.getItem("token");
+
+  fetch(`${API_BASE}/deployOrder`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify({ order_id: orderId })
+  })
+  .then(res => res.json())
+  .then(data => {
+    
+
+    
+      alert("✅ Order deployed.");
+        loadSellerOrders();
+      
+  })
+  .catch(err => {
+    console.error("Deploy order error:", err);
+    alert("Error: " + err.message);
+  });
+}
+
+function rejectOrder(orderId) {
+  const token = localStorage.getItem("token");
+
+  fetch(`${API_BASE}/cancelOrder`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify({ order_id: orderId })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      alert("❌ Order rejected.");
+      loadSellerOrders();
+    } else {
+      alert("Failed to reject order.");
+    }
+  })
+  .catch(err => {
+    console.error("Cancel order error:", err);
+    alert("Error: " + err.message);
   });
 }

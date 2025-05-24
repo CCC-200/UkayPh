@@ -24,6 +24,7 @@
         <button class="btn btn-info ms-2" id="my-orders-btn" onclick="openOrdersModal() " style="display: none;">My Orders</button>
         <button class="btn btn-secondary" id="customer-address-btn" onclick="openCustomerAddressModal()" style="display: none;">My Address</button>
        <button class="btn btn-success" id="osy-orders-btn" onclick="openOsyOrdersModal()" style="display: none;"> My Orders</button>
+       <button class="btn btn-dark" id="seller-orders-btn" onclick="openSellerOrdersModal()" style="display: none;">Active Orders</button>
         <div class="button-row">
           <button id="add-product-btn" class="btn btn-success" style="display: none;" onclick="openAddProductModal()">+ Add Product</button>
           <div class="dropdown">
@@ -254,7 +255,7 @@
           </div>
 
           <!-- Shop Name -->
-          <div class="mb-3">
+          <div class="mb-3" id="profile-shop-group">
             <label class="form-label">
               <i class="bi bi-shop me-2"></i>Shop Name
             </label>
@@ -430,6 +431,29 @@
           <div class="col-md-6">
             <h6>✅ My Accepted Orders</h6>
             <div id="osy-my-orders" class="mt-2"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="sellerOrdersModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <div class="modal-content rounded-4">
+      <div class="modal-header">
+        <h5 class="modal-title">Active Orders</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-md-6 border-end">
+            <h6>🕒 Pending Orders</h6>
+            <div id="seller-pending-orders" class="mt-2"></div>
+          </div>
+          <div class="col-md-6">
+            <h6>✅ Deployed Orders</h6>
+            <div id="seller-deployed-orders" class="mt-2"></div>
           </div>
         </div>
       </div>
