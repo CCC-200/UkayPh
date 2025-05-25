@@ -33,6 +33,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("add-product-btn").style.display = "inline-block";
     document.querySelector(".ShopDetails-btn").style.display = "inline-block";
      document.getElementById("seller-orders-btn").style.display = "inline-block";
+     document.getElementById("osy-rating-btn").style.display = "inline-block";
   }
   if (data.user.userType === "customer") {
       document.getElementById("cart-icon").style.display = "inline-block";
@@ -98,6 +99,7 @@ function handleLogin() {
     document.getElementById("add-product-btn").style.display = "inline-block";
     document.querySelector(".ShopDetails-btn").style.display = "inline-block";
      document.getElementById("seller-orders-btn").style.display = "inline-block";
+     document.getElementById("osy-rating-btn").style.display = "inline-block";
     
   }
         // Optionally disable the login button
@@ -173,6 +175,7 @@ function submitRegister() {
     document.getElementById("add-product-btn").style.display = "inline-block";
     document.querySelector(".ShopDetails-btn").style.display = "inline-block";
      document.getElementById("seller-orders-btn").style.display = "inline-block";
+     document.getElementById("osy-rating-btn").style.display = "inline-block";
     
   }if (data.user.userType === "customer") {
       document.getElementById("cart-icon").style.display = "inline-block";
@@ -219,6 +222,7 @@ function handleLogout() {
       document.getElementById("customer-address-btn").style.display = "none";
       document.getElementById("osy-orders-btn").style.display = "none";
        document.getElementById("seller-orders-btn").style.display = "none";
+       document.getElementById("osy-rating-btn").style.display = "none";
 
 // 🔄 Clear like state memory
 Object.keys(likedProducts).forEach(key => delete likedProducts[key]);
@@ -283,6 +287,7 @@ function submitLogin() {
     document.getElementById("add-product-btn").style.display = "inline-block";
     document.querySelector(".ShopDetails-btn").style.display = "inline-block";
      document.getElementById("seller-orders-btn").style.display = "inline-block";
+     document.getElementById("osy-rating-btn").style.display = "inline-block";
    
   }if (data.user.userType === "customer") {
       document.getElementById("cart-icon").style.display = "inline-block";
@@ -1184,9 +1189,18 @@ function openOrdersModal() {
 
       let actionButtons = "";
 
-      if (status === "pending") {
-        actionButtons = `<button class="btn btn-sm btn-danger" onclick="cancelOrder('${order.id}')">Cancel</button>`;
+      if (status === "pending" || status === "Pending") {
+        {
+  order.status?.toLowerCase() === "pending"
+    ? `<button class="btn btn-sm btn-danger me-2" onclick="cancelOrder('${order.id}')">Cancel</button>`
+    : order.status?.toLowerCase() === "delivered"
+    ? `<button class="btn btn-sm btn-success" onclick="confirmReceive('${order.id}')">Confirm Delivery</button>`
+    : ""
+}
       } else if (status === "deployed") {
+        actionButtons = `<button class="btn btn-sm btn-warning" onclick="confirmReceive('${order.id}')">Cancel Order</button>`;
+      }
+      else if (status === "delivered") {
         actionButtons = `<button class="btn btn-sm btn-success" onclick="confirmReceive('${order.id}')">Confirm Delivery</button>`;
       }
 
@@ -1368,17 +1382,16 @@ function openOsyOrdersModal() {
 function loadOsyOrders() {
   const token = localStorage.getItem("token");
 
-  // Clear both containers initially
+  // Containers
   const availableContainer = document.getElementById("osy-available-orders");
   const acceptedContainer = document.getElementById("osy-my-orders");
+
   availableContainer.innerHTML = "<p>Loading available orders...</p>";
   acceptedContainer.innerHTML = "<p>Loading your accepted orders...</p>";
 
-  // Fetch user profile from localStorage (previously stored on login)
   const user = JSON.parse(localStorage.getItem("user"));
   const userId = user?.profile?.user_id;
 
-  // Call both APIs
   Promise.all([
     fetch(`${API_BASE}/getDeployedOrders`, {
       method: "POST",
@@ -1399,7 +1412,6 @@ function loadOsyOrders() {
     }).then(res => res.json())
   ])
   .then(([deployedData, acceptedData]) => {
-    // Filter both datasets
     const available = (deployedData.orders || []).filter(o =>
       (!o.delivery_id || o.delivery_id === null) &&
       o.status?.toLowerCase() === "deployed"
@@ -1407,21 +1419,29 @@ function loadOsyOrders() {
 
     const accepted = (acceptedData.orders || []).filter(o =>
       o.delivery_id === userId &&
-      (o.status?.toLowerCase() === "accepted" || o.status?.toLowerCase() === "deployed")
+      ["accepted", "deployed"].includes(o.status?.toLowerCase())
     );
 
-    // Render Available Orders
+    // ✅ Available Orders
     availableContainer.innerHTML = "";
     if (available.length === 0) {
       availableContainer.innerHTML = "<p class='text-muted'>No available orders.</p>";
     } else {
       available.forEach(order => {
+        const customerName = `${order.customer?.firstName || ""} ${order.customer?.lastName || ""}`.trim();
+        const shopName = order.shop?.shopName || "Unknown";
+        const barangay = order.address?.barangay || "Unknown";
+
         const card = document.createElement("div");
         card.className = "card mb-2";
         card.innerHTML = `
           <div class="card-body">
             <strong>Order ID:</strong> ${order.id}<br>
-            <strong>Barangay:</strong> ${order.address?.barangay || "Unknown"}<br>
+            <strong>Customer:</strong> ${customerName}<br>
+            <strong>Customer Barangay:</strong> ${barangay}<br>
+            <strong>Shop:</strong> ${shopName}<br>
+            <strong>Product Total:</strong> ₱${order.totalProductPrice}<br>
+            <strong>Delivery Fee:</strong> ₱${order.deliveryPrice}<br>
             <button class="btn btn-sm btn-primary mt-2" onclick="acceptOsyOrder('${order.id}')">Accept</button>
           </div>
         `;
@@ -1429,19 +1449,31 @@ function loadOsyOrders() {
       });
     }
 
-    // Render Accepted Orders
+    // ✅ Accepted Orders
     acceptedContainer.innerHTML = "";
     if (accepted.length === 0) {
       acceptedContainer.innerHTML = "<p class='text-muted'>You haven't accepted any orders.</p>";
     } else {
       accepted.forEach(order => {
+        const status = order.status?.toLowerCase();
+        const showDeliverBtn = status === "accepted";
+
+        const customerName = `${order.customer?.firstName || ""} ${order.customer?.lastName || ""}`.trim();
+        const shopName = order.shop?.shopName || "Unknown";
+        const barangay = order.address?.barangay || "Unknown";
+
         const card = document.createElement("div");
         card.className = "card mb-2";
         card.innerHTML = `
           <div class="card-body">
             <strong>Order ID:</strong> ${order.id}<br>
             <strong>Status:</strong> <span class="badge bg-info">${order.status}</span><br>
-            <strong>To:</strong> ${order.address?.barangay || "Unknown"}
+            <strong>Customer:</strong> ${customerName}<br>
+            <strong>Customer Barangay:</strong> ${barangay}<br>
+            <strong>Shop:</strong> ${shopName}<br>
+            <strong>Product Total:</strong> ₱${order.totalProductPrice}<br>
+            <strong>Delivery Fee:</strong> ₱${order.deliveryPrice}<br>
+            ${showDeliverBtn ? `<button class="btn btn-sm btn-success mt-2" onclick="deliverOrder('${order.id}')">Mark as Delivered</button>` : ""}
           </div>
         `;
         acceptedContainer.appendChild(card);
@@ -1514,7 +1546,8 @@ function loadSellerOrders() {
     const pending = orders.filter(o => o.status?.toLowerCase() === "pending");
     const active = orders.filter(o => {
       const status = o.status?.toLowerCase();
-      return status === "accepted" || status === "deployed";
+     return status === "accepted" || status === "deployed" || status === "delivered" || status === "completed" || status === "received" || status === "canceled";
+      
     });
 
     pendingContainer.innerHTML = "";
@@ -1547,9 +1580,22 @@ function loadSellerOrders() {
       deployedContainer.innerHTML = "<p class='text-muted'>No active orders.</p>";
     } else {
       active.forEach(order => {
-        const statusBadge = order.status?.toLowerCase() === "deployed"
-          ? `<span class="badge bg-success">${order.status}</span>`
-          : `<span class="badge bg-info">${order.status}</span>`;
+        const status = order.status?.toLowerCase();
+let statusBadge = `<span class="badge bg-secondary">${order.status}</span>`;
+let actionButtons = "";
+if (status === "deployed") {
+  statusBadge = `<span class="badge bg-success">${order.status}</span>`;
+} else if (status === "accepted") {
+  statusBadge = `<span class="badge bg-info">${order.status}</span>`;
+} else if (status === "delivered") {
+  statusBadge = `<span class="badge bg-success">${order.status}</span>`;
+}
+if (status === "received") {
+  actionButtons += `<button class="btn btn-sm btn-primary me-2" onclick="completeOrder('${order.id}')">Complete Order</button>`;
+}
+if (status === "completed") {
+  actionButtons += `<button class="btn btn-sm btn-warning" onclick="openRateOsyModal('${order.id}', '${order.delivery?.user_id}')">Rate OSY</button>`;
+}
 
         const card = document.createElement("div");
         card.className = "card mb-2";
@@ -1557,7 +1603,8 @@ function loadSellerOrders() {
           <div class="card-body">
             <strong>Order ID:</strong> ${order.id}<br>
             <strong>Status:</strong> ${statusBadge}<br>
-            <strong>To:</strong> ${order.address?.barangay || "—"}
+            <strong>To:</strong> ${order.address?.barangay || "—"}</br>
+            <div class="mt-2 d-flex gap-2">${actionButtons}</div>
           </div>
         `;
         deployedContainer.appendChild(card);
@@ -1621,4 +1668,203 @@ function rejectOrder(orderId) {
     console.error("Cancel order error:", err);
     alert("Error: " + err.message);
   });
+}
+function deliverOrder(orderId) {
+  const token = localStorage.getItem("token");
+
+  if (!confirm("Mark this order as delivered?")) return;
+
+  fetch(`${API_BASE}/deliverOrder`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify({ order_id: orderId })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success || data.order) {
+      alert("✅ Order marked as delivered.");
+      loadOsyOrders(); // reload OSY modal view
+    } else {
+      alert("Failed to deliver: " + (data.message || "Unknown error"));
+    }
+  })
+  .catch(err => {
+    console.error("Deliver error:", err);
+    alert("Error: " + err.message);
+  });
+}
+
+function confirmReceive(orderId) {
+  const token = localStorage.getItem("token");
+
+  if (!confirm("Confirm you have received this order?")) return;
+
+  fetch(`${API_BASE}/receiveOrder`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify({ order_id: orderId })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success || data.order) {
+      alert("✅ Order marked as received.");
+      openOrdersModal(); // refresh modal list
+    } else {
+      alert("Failed to confirm: " + (data.message || "Unknown error"));
+    }
+  })
+  .catch(err => {
+    console.error("Receive order error:", err);
+    alert("Error: " + err.message);
+  });
+}
+
+function completeOrder(orderId) {
+  const token = localStorage.getItem("token");
+
+  fetch(`${API_BASE}/completeOrder`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify({ order_id: orderId })
+  })
+  .then(res => res.json())
+  .then(data => {
+    alert("✅ Order marked as completed.");
+    loadSellerOrders(); // Refresh orders
+  })
+  .catch(err => {
+    console.error("Complete order error:", err);
+    alert("Error: " + err.message);
+  });
+}
+
+function openOsyRatingsModal(preFillOrder = null) {
+  const token = localStorage.getItem("token");
+  const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById("osyRatingsModal"));
+  modal.show();
+
+  const container = document.getElementById("osy-ratings-container");
+  container.innerHTML = "<p class='text-muted'>Loading...</p>";
+
+  fetch(`${API_BASE}/getOrders`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify({})
+  })
+  .then(res => res.json())
+  .then(data => {
+    const orders = data.orders || [];
+
+    const toRate = orders.filter(o => 
+      o.status?.toLowerCase() === "completed" && !o.review
+    );
+
+    const rated = orders.filter(o => o.review);
+
+    container.innerHTML = "";
+
+    // ✅ Render "to be rated"
+    if (toRate.length > 0) {
+      container.innerHTML += "<h5 class='mt-3'>Rate OSY</h5>";
+      toRate.forEach(order => {
+        container.innerHTML += `
+          <div class="card mb-2">
+            <div class="card-body">
+              <strong>Order ID:</strong> ${order.id}<br>
+              <strong>OSY:</strong> ${order.delivery?.firstName || ""} ${order.delivery?.lastName || ""}<br>
+              <label>Rating (1–5):</label>
+              <input type="number" class="form-control mb-2" id="rate-${order.id}-rating" min="1" max="5">
+              <label>Comment:</label>
+              <textarea class="form-control mb-2" id="rate-${order.id}-comment"></textarea>
+              <button class="btn btn-sm btn-primary" onclick="submitOsyRating('${order.id}', '${order.delivery_id}')">Submit Rating</button>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    // ✅ Render previous ratings
+    if (rated.length > 0) {
+      container.innerHTML += "<h5 class='mt-4'>Previously Rated</h5>";
+      rated.forEach(order => {
+        container.innerHTML += `
+          <div class="card mb-2">
+            <div class="card-body">
+              <strong>Order ID:</strong> ${order.id}<br>
+              <strong>OSY:</strong> ${order.delivery?.firstName || ""} ${order.delivery?.lastName || ""}<br>
+              <strong>Rating:</strong> ${order.review?.rating}/5<br>
+              <strong>Comment:</strong> ${order.review?.comment || "—"}
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    if (toRate.length === 0 && rated.length === 0) {
+      container.innerHTML = "<p class='text-muted'>No OSY ratings available.</p>";
+    }
+
+    // 🧩 Optional: Pre-fill a specific one
+    if (preFillOrder) {
+      setTimeout(() => {
+        const rateInput = document.getElementById(`rate-${preFillOrder.orderId}-rating`);
+        if (rateInput) rateInput.focus();
+      }, 300);
+    }
+  })
+  .catch(err => {
+    console.error("Ratings load error:", err);
+    container.innerHTML = "<p class='text-danger'>Failed to load OSY ratings.</p>";
+  });
+}
+
+function submitOsyRating(orderId, deliveryId) {
+  const token = localStorage.getItem("token");
+  const rating = document.getElementById(`rate-${orderId}-rating`).value;
+  const comment = document.getElementById(`rate-${orderId}-comment`).value;
+
+  fetch(`${API_BASE}/review`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify({
+      order_id: orderId,
+      reviewee_id: deliveryId,
+      rating: Number(rating),
+      comment
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+    alert("✅ OSY rated successfully.");
+    openOsyRatingsModal(); // Refresh ratings
+  })
+  .catch(err => {
+    console.error("Rating error:", err);
+    alert("Failed to submit rating.");
+  });
+}
+
+// Triggered from seller modal
+function openRateOsyModal(orderId, deliveryId) {
+  const sellerModal = bootstrap.Modal.getInstance(document.getElementById("sellerOrdersModal"));
+  if (sellerModal) sellerModal.hide();
+
+  setTimeout(() => {
+    openOsyRatingsModal({ orderId, deliveryId });
+  }, 300);
 }

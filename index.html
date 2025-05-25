@@ -25,6 +25,7 @@
         <button class="btn btn-secondary" id="customer-address-btn" onclick="openCustomerAddressModal()" style="display: none;">My Address</button>
        <button class="btn btn-success" id="osy-orders-btn" onclick="openOsyOrdersModal()" style="display: none;"> My Orders</button>
        <button class="btn btn-dark" id="seller-orders-btn" onclick="openSellerOrdersModal()" style="display: none;">Active Orders</button>
+      <button class="btn btn-info ms-2" id="osy-rating-btn" onclick="openOsyRatingsModal()" style="display: none;">OSY Ratings</button>
         <div class="button-row">
           <button id="add-product-btn" class="btn btn-success" style="display: none;" onclick="openAddProductModal()">+ Add Product</button>
           <div class="dropdown">
@@ -456,6 +457,20 @@
             <div id="seller-deployed-orders" class="mt-2"></div>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="osyRatingsModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title">OSY Ratings</h5></div>
+      <div class="modal-body" id="osy-ratings-container">
+        <p>Loading...</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
       </div>
     </div>
   </div>
