@@ -28,7 +28,7 @@
   </button>
 
   <button class="btn btn-warning ShopDetails-btn drawer-link" onclick="openShopDetailsModal()" style="display: none;">
-    🏬 My Shop
+    🏬 My Shop Address
   </button>
 
   <button class="btn btn-dark drawer-link" id="seller-orders-btn" onclick="openSellerOrdersModal()" style="display: none;">
@@ -72,7 +72,7 @@
     <div class="button-row">
         <button class="logout-btn" onclick="handleLogout()" style="display: none;">Logout</button>
         <button class="btn btn-warning profile-btn" onclick="openProfileModal()" style="display: none;">My Profile</button>
-        <button class="btn btn-warning ShopDetails-btn" onclick="openShopDetailsModal()" style="display: none;">My Shop</button>
+        <button class="btn btn-warning ShopDetails-btn" onclick="openShopDetailsModal()" style="display: none;">My Shop Address</button>
         <button class="btn btn-info ms-2" id="my-orders-btn" onclick="openOrdersModal() " style="display: none;">My Orders</button>
         <button class="btn btn-secondary" id="customer-address-btn" onclick="openCustomerAddressModal()" style="display: none;">My Address</button>
        <button class="btn btn-success" id="osy-orders-btn" onclick="openOsyOrdersModal()" style="display: none;"> My Orders</button>
@@ -135,6 +135,7 @@
             placeholder="Search products, tags, shop..."
             oninput="applyFilters()"
             style="width: 250px;"
+            autocomplete="off"
           />
           <button class="btn btn-outline-secondary" onclick="clearSearch()">Clear</button>
         </div>
@@ -236,7 +237,7 @@
             </label>
             <!-- Profile Image Preview -->
 <div class="d-flex justify-content-center align-items-center my-3" style="height: 150px;">
-  <img id="profile-image-preview" src="https://via.placeholder.com/120?text=No+Image"
+  <img id="profile-image-preview" src="https://ucarecdn.com/687b73a9-4237-462b-bc53-62bc95233bb6/hdef.png"
        alt="Profile"
        class="rounded-circle"
        style="width: 120px; height: 120px; object-fit: cover;" />
@@ -420,19 +421,19 @@
           <h6>Add New Address</h6>
           <div class="mb-2">
             <label class="form-label">Name</label>
-            <input type="text" class="form-control" id="custAddr_name" />
+            <input type="text" class="form-control" id="custAddr_name" placeholder="e.g. James Residence" />
           </div>
           <div class="mb-2">
             <label class="form-label">Barangay</label>
-            <input type="text" class="form-control" id="custAddr_barangay" />
+            <input type="text" class="form-control" id="custAddr_barangay" placeholder="e.g. Palao" />
           </div>
           <div class="mb-2">
             <label class="form-label">Street</label>
-            <input type="text" class="form-control" id="custAddr_street" />
+            <input type="text" class="form-control" id="custAddr_street" placeholder="e.g. National Highway" />
           </div>
           <div class="mb-2">
             <label class="form-label">Landmark</label>
-            <input type="text" class="form-control" id="custAddr_landmark" />
+            <input type="text" class="form-control" id="custAddr_landmark" placeholder="e.g. Beside 7-Eleven" />
           </div>
           <div class="text-end">
             <button type="button" class="btn btn-primary" onclick="submitCustomerAddress()">Add Address</button>

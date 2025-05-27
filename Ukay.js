@@ -59,7 +59,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     })
     .catch(err => {
-      console.warn("Auto-login failed:", err.message);
+      console.warn("❌ Auto-login failed:", err.message);
       localStorage.removeItem("token");
       localStorage.removeItem("user");
       document.querySelector(".logout-btn").style.display = "none";
@@ -108,13 +108,13 @@ function handleLogin() {
         document.getElementById("login-btn").disabled = true;
         document.getElementById("login-btn1").disabled = true;
       } else {
-        alert("Login failed: Missing token or user data.");
+        alert("❌ Login failed: Missing token or user data.");
       
       }
     })
     .catch(error => {
-      console.error("Login error:", error);
-      alert("Login error: " + error.message);
+      console.error("❌ Login error:", error);
+      alert("❌ Login error: " + error.message);
   
     });
     if (data.user.userType === "customer") {
@@ -203,13 +203,13 @@ function submitRegister() {
   document.getElementById("osy-orders-btn").style.display = "inline-block";
 }
     } else {
-      alert("Registration failed.");
+      alert("❌ Registration failed.");
     
     }
   })
   .catch(error => {
-    console.error("Registration error:", error);
-    alert("Error: " + error.message);
+    console.error("❌ Registration error:", error);
+    alert("❌ Error: " + error.message);
   
   });
 }
@@ -321,12 +321,12 @@ function submitLogin() {
 }
   
     } else {
-      alert("Login failed.");
+      alert("❌ Login failed.");
     }
   })
   .catch(error => {
-    console.error("Login error:", error);
-    alert("Login error: " + error.message);
+    console.error("❌ Login error:", error);
+    alert("❌ Login error: " + error.message);
   
   });
 }
@@ -536,12 +536,12 @@ buttonElement.innerHTML = `${heartIcon} <span class="like-count">${data.product.
         buttonElement.classList.add("btn-outline-danger");
       }
     } else {
-      alert("Failed to update like: " + (data.message || "Unknown error"));
+      alert("❌ Failed to update like: " + (data.message || "Unknown error"));
     }
   })
   .catch(err => {
-    console.error("Like toggle error:", err);
-    alert("Request failed: " + err.message);
+    console.error("❌ Like toggle error:", err);
+    alert("❌ Request failed: " + err.message);
   });
 }
 
@@ -571,8 +571,8 @@ function addToCart(productId) {
     updateCartBadge(); // optional: update item count badge
   })
   .catch(err => {
-    console.error("Add to cart error:", err);
-    alert("Failed to add to cart: " + err.message);
+    console.error("❌ Add to cart error:", err);
+    alert("❌ Failed to add to cart: " + err.message);
   });
 }
 
@@ -640,8 +640,8 @@ function ToggleCart() {
     modal.show();
   })
   .catch(err => {
-    console.error("Get cart error:", err);
-    alert("Failed to load cart: " + err.message);
+    console.error("❌ Get cart error:", err);
+    alert("❌ Failed to load cart: " + err.message);
   });
 }
 
@@ -660,7 +660,7 @@ function updateCartQuantity(productId, quantity) {
     })
   })
   .then(() => ToggleCart())
-  .catch(err => alert("Failed to update cart: " + err.message));
+  .catch(err => alert("❌ Failed to update cart: " + err.message));
 }
 
 function removeFromCart(productId) {
@@ -693,7 +693,7 @@ function removeFromCart(productId) {
   })
   .catch(err => {
     console.error("❌ Remove item error:", err);
-    alert("Failed to remove item: " + err.message);
+    alert("❌ Failed to remove item: " + err.message);
   });
 }
 function checkoutCart() {
@@ -714,8 +714,8 @@ function checkoutCart() {
     modal.hide();
   })
   .catch(err => {
-    console.error("Checkout error:", err);
-    alert("Failed to checkout: " + err.message);
+    console.error("❌ Checkout error:", err);
+    alert("❌ Failed to checkout: " + err.message);
   });
 }
 function updateCartBadge() {
@@ -737,7 +737,7 @@ function updateCartBadge() {
     if (cartCount) cartCount.textContent = count;
   })
   .catch(err => {
-    console.error("Failed to update cart badge:", err);
+    console.error("❌ Failed to update cart badge:", err);
   });
 }
 
@@ -785,7 +785,7 @@ async function uploadImage(file, token) {
   const data = await response.json();
 
   if (!response.ok) {
-    throw new Error(data.message || "Image upload failed.");
+    throw new Error(data.message || "❌ Image upload failed.");
   }
 
   return data.imagePath || data.path || data.url; // Adjust based on server's response
@@ -849,8 +849,8 @@ async function submitAddProduct() {
     bootstrap.Modal.getInstance(document.getElementById("addProductModal")).hide();
     loadProducts();
   } catch (err) {
-    console.error("Add product error:", err);
-    alert("Failed: " + err.message);
+    console.error("❌ Add product error:", err);
+    alert("❌ Failed: " + err.message);
   }
 }
 
@@ -879,9 +879,9 @@ function openProfileModal() {
     const preview = document.getElementById("profile-image-preview");
     if (imageUrl) {
       preview.src = imageUrl;
-      preview.style.display = "block";
-    } else {
       preview.style.display = "none";
+    } else {
+      preview.style.display = "block";
     }
 
     widget.onUploadComplete((info) => {
@@ -914,8 +914,8 @@ function openProfileModal() {
     modal.show();
   })
   .catch(err => {
-    console.error("Profile fetch error:", err);
-    alert("Failed to fetch profile.");
+    console.error("❌ Profile fetch error:", err);
+    alert("❌ Failed to fetch profile.");
   });
 }
 
@@ -955,8 +955,8 @@ function submitProfileUpdate() {
     loadProducts();  // ✅ now this will run without breaking
   })
   .catch(err => {
-    console.error("Update error:", err);
-    alert("Profile update failed: " + err.message);
+    console.error("❌ Update error:", err);
+    alert("❌ Profile update failed: " + err.message);
   });
 }
 
@@ -1003,8 +1003,8 @@ function loadShopAddresses() {
     }
   })
   .catch(err => {
-    console.error("Address fetch error:", err);
-    alert("Failed to load addresses: " + err.message);
+    console.error("❌ Address fetch error:", err);
+    alert("❌ Failed to load addresses: " + err.message);
   });
 }
 
@@ -1048,8 +1048,8 @@ function submitShopDetailsUpdate() {
     loadShopAddresses(); // ✅ refresh contents without re-showing modal
   })
   .catch(err => {
-    console.error("Add address error:", err);
-    alert("Failed to add address: " + err.message);
+    console.error("❌ Add address error:", err);
+    alert("❌ Failed to add address: " + err.message);
   });
 }
 
@@ -1085,8 +1085,8 @@ function submitShopDetailsUpdate() {
     openShopDetailsModal(); // refresh the updated list
   })
   .catch(err => {
-    console.error("Add address error:", err);
-    alert("Failed to add address: " + err.message);
+    console.error("❌ Add address error:", err);
+    alert("❌ Failed to add address: " + err.message);
   });
 }
 
@@ -1122,12 +1122,12 @@ function setAsDefaultAddress(targetId) {
     if (data.success) {
       openShopDetailsModal(); // refresh list
     } else {
-      alert("Failed to update default address.");
+      alert("❌ Failed to update default address.");
     }
   })
   .catch(err => {
-    console.error("Set default error:", err);
-    alert("Error: " + err.message);
+    console.error("❌ Set default error:", err);
+    alert("❌ Error: " + err.message);
   });
 }
 function deleteAddress(targetId) {
@@ -1161,12 +1161,12 @@ function deleteAddress(targetId) {
     if (data.success) {
       openShopDetailsModal(); // refresh
     } else {
-      alert("Delete failed.");
+      alert("❌ Delete failed.");
     }
   })
   .catch(err => {
-    console.error("Delete error:", err);
-    alert("Error: " + err.message);
+    console.error("❌ Delete error:", err);
+    alert("❌ Error: " + err.message);
   });
 }
 
@@ -1238,8 +1238,8 @@ function openOrdersModal() {
     });
   })
   .catch(err => {
-    console.error("Get orders error:", err);
-    list.innerHTML = "<p class='text-danger'>Failed to load orders.</p>";
+    console.error("❌ Get orders error:", err);
+    list.innerHTML = "<p class='text-danger'>❌ Failed to load orders.</p>";
   });
 }
 
@@ -1262,12 +1262,12 @@ function confirmReceive(orderId) {
       alert("✅ Order marked as received.");
       openOrdersModal(); // refresh
     } else {
-      alert("Failed to confirm: " + (data.message || "Unknown error"));
+      alert("❌ Failed to confirm: " + (data.message || "Unknown error"));
     }
   })
   .catch(err => {
-    console.error("Confirm receive error:", err);
-    alert("Error: " + err.message);
+    console.error("❌ Confirm receive error:", err);
+    alert("❌ Error: " + err.message);
   });
 }
 
@@ -1290,12 +1290,12 @@ function cancelOrder(orderId) {
       alert("Order cancelled.");
       openOrdersModal(); // refresh modal
     } else {
-      alert("Failed to cancel: " + (data.message || "Unknown error"));
+      alert("❌ Failed to cancel: " + (data.message || "Unknown error"));
     }
   })
   .catch(err => {
-    console.error("Cancel order error:", err);
-    alert("Error: " + err.message);
+    console.error("❌ Cancel order error:", err);
+    alert("❌ Error: " + err.message);
   });
 }
 
@@ -1350,8 +1350,8 @@ function loadCustomerAddresses() {
     });
   })
   .catch(err => {
-    console.error("Address fetch failed:", err);
-    document.getElementById("customer-address-list").innerHTML = `<p class="text-danger">Failed to load addresses.</p>`;
+    console.error("❌ Address fetch failed:", err);
+    document.getElementById("customer-address-list").innerHTML = `<p class="text-danger">❌ Failed to load addresses.</p>`;
   });
 }
 
@@ -1382,12 +1382,12 @@ function submitCustomerAddress() {
       document.getElementById("customerAddress-form").reset();
       loadCustomerAddresses();
     } else {
-      alert("Failed to add address.");
+      alert("❌ Failed to add address.");
     }
   })
   .catch(err => {
-    console.error("Add address error:", err);
-    alert("Error adding address: " + err.message);
+    console.error("❌ Add address error:", err);
+    alert("❌ Error adding address: " + err.message);
   });
 }
 
@@ -1500,9 +1500,9 @@ function loadOsyOrders() {
     }
   })
   .catch(err => {
-    console.error("Error loading OSY orders:", err);
-    availableContainer.innerHTML = "<p class='text-danger'>Failed to load available orders.</p>";
-    acceptedContainer.innerHTML = "<p class='text-danger'>Failed to load accepted orders.</p>";
+    console.error("❌ Error loading OSY orders:", err);
+    availableContainer.innerHTML = "<p class='text-danger'>❌ Failed to load available orders.</p>";
+    acceptedContainer.innerHTML = "<p class='text-danger'>❌ Failed to load accepted orders.</p>";
   });
 }
 
@@ -1631,8 +1631,8 @@ if (status === "completed") {
     }
   })
   .catch(err => {
-    console.error("Seller orders load error:", err);
-    document.getElementById("seller-pending-orders").innerHTML = "<p class='text-danger'>Failed to load orders.</p>";
+    console.error("❌ Seller orders load error:", err);
+    document.getElementById("seller-pending-orders").innerHTML = "<p class='text-danger'>❌ Failed to load orders.</p>";
   });
 }
 
@@ -1680,12 +1680,12 @@ function rejectOrder(orderId) {
       alert("❌ Order rejected.");
       loadSellerOrders();
     } else {
-      alert("Failed to reject order.");
+      alert("❌ Failed to reject order.");
     }
   })
   .catch(err => {
-    console.error("Cancel order error:", err);
-    alert("Error: " + err.message);
+    console.error("❌ Cancel order error:", err);
+    alert("❌ Error: " + err.message);
   });
 }
 function deliverOrder(orderId) {
@@ -1707,12 +1707,12 @@ function deliverOrder(orderId) {
       alert("✅ Order marked as delivered.");
       loadOsyOrders(); // reload OSY modal view
     } else {
-      alert("Failed to deliver: " + (data.message || "Unknown error"));
+      alert("❌ Failed to deliver: " + (data.message || "Unknown error"));
     }
   })
   .catch(err => {
-    console.error("Deliver error:", err);
-    alert("Error: " + err.message);
+    console.error("❌ Deliver error:", err);
+    alert("❌ Error: " + err.message);
   });
 }
 
@@ -1735,12 +1735,12 @@ function confirmReceive(orderId) {
       alert("✅ Order marked as received.");
       openOrdersModal(); // refresh modal list
     } else {
-      alert("Failed to confirm: " + (data.message || "Unknown error"));
+      alert("❌ Failed to confirm: " + (data.message || "Unknown error"));
     }
   })
   .catch(err => {
-    console.error("Receive order error:", err);
-    alert("Error: " + err.message);
+    console.error("❌ Receive order error:", err);
+    alert("❌ Error: " + err.message);
   });
 }
 
@@ -1844,8 +1844,8 @@ function openOsyRatingsModal(preFillOrder = null) {
     }
   })
   .catch(err => {
-    console.error("Ratings load error:", err);
-    container.innerHTML = "<p class='text-danger'>Failed to load OSY ratings.</p>";
+    console.error("❌ Ratings load error:", err);
+    container.innerHTML = "<p class='text-danger'>❌ Failed to load OSY ratings.</p>";
   });
 }
 
@@ -1873,8 +1873,8 @@ function submitOsyRating(orderId, deliveryId) {
     openOsyRatingsModal(); // Refresh ratings
   })
   .catch(err => {
-    console.error("Rating error:", err);
-    alert("Failed to submit rating.");
+    console.error("❌ Rating error:", err);
+    alert("❌ Failed to submit rating.");
   });
 }
 
