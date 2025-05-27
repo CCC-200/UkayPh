@@ -310,3 +310,7 @@ color: #dee2e6;
   color: white;
   border-radius: 0.5rem 0.5rem 0 0;
 }
+ .no-hover-change:hover {
+     /* original btn-primary color */
+    color: black !important;             /* original text color */
+  }
