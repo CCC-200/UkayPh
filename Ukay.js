@@ -21,10 +21,10 @@ document.addEventListener("DOMContentLoaded", () => {
       if (data.user) {
         localStorage.setItem("user", JSON.stringify(data.user));
         showLoginStatus(`Welcome back, ${data.user.username}! You are a ${data.user.userType}. `);
-        document.querySelector(".login-btn").style.display = "none";
-        document.querySelector(".logout-btn").style.display = "inline-block";
+       // document.querySelector(".login-btn").style.display = "none";
+       // document.querySelector(".logout-btn").style.display = "inline-block";
         document.querySelector(".profile-btn").style.display = "inline-block";
-        document.querySelector(".register-btn").style.display = "none";
+       // document.querySelector(".register-btn").style.display = "none";
         
     if (data.user.userType === "shop") {
       document.getElementById("cart-icon").style.display = "none";
@@ -46,11 +46,11 @@ document.addEventListener("DOMContentLoaded", () => {
 }
  
       } else {
-        document.querySelector(".login-btn").style.display = "block";
-        document.querySelector(".logout-btn").style.display = "none";
+        //document.querySelector(".login-btn").style.display = "block";
+        //document.querySelector(".logout-btn").style.display = "none";
         document.getElementById("add-product-btn").style.display = "none";
         document.querySelector(".ShopDetails-btn").style.display = "none";
-        document.querySelector(".register-btn").style.display = "inline-block";
+        //document.querySelector(".register-btn").style.display = "inline-block";
         document.querySelector(".profile-btn").style.display = "none";
         throw new Error("No user returned");
         
@@ -103,7 +103,7 @@ function handleLogin() {
     
   }
         // Optionally disable the login button
-        document.querySelector(".login-btn").disabled = true;
+        //document.querySelector(".login-btn").disabled = true;
       } else {
         alert("Login failed: Missing token or user data.");
       
@@ -163,9 +163,9 @@ function submitRegister() {
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
       showLoginStatus(`Registered and logged in as ${data.user.username}. You are a ${data.user.userType}`);
-      document.getElementById("register-dropdown").style.display = "none";
-      document.querySelector(".register-btn").style.display = "none";
-      document.querySelector(".login-btn").style.display = "none";
+      //document.getElementById("register-dropdown").style.display = "none";
+      //document.querySelector(".register-btn").style.display = "none";
+      //document.querySelector(".login-btn").style.display = "none";
       document.querySelector(".logout-btn").style.display = "inline-block";
       document.querySelector(".profile-btn").style.display = "inline-block";
       if (data.user.userType === "shop") {
@@ -213,11 +213,11 @@ function handleLogout() {
 
     // Reset UI state
     document.querySelector(".logout-btn").style.display = "none";
-    document.querySelector(".login-btn").style.display = "block";
+    //document.querySelector(".login-btn").style.display = "block";
     document.getElementById("add-product-btn").style.display = "none";
     document.querySelector(".ShopDetails-btn").style.display = "none";
     document.querySelector(".profile-btn").style.display = "none";
-   document.querySelector(".register-btn").style.display = "inline-block";
+   //document.querySelector(".register-btn").style.display = "inline-block";
        document.getElementById("my-orders-btn").style.display = "none";
       document.getElementById("customer-address-btn").style.display = "none";
       document.getElementById("osy-orders-btn").style.display = "none";
@@ -245,10 +245,7 @@ if (cartCount) cartCount.textContent = "0";
 
 
 
-function toggleLoginDropdown() {
-  const dropdown = document.getElementById("login-dropdown");
-  dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
-}
+
 
 function submitLogin() {
   const username = document.getElementById("login-username").value;
@@ -273,10 +270,16 @@ function submitLogin() {
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
 
-      showLoginStatus(`Welcome, ${data.user.username}! You are a ${data.user.userType}.`);
-      document.querySelector(".login-btn").style.display = "none";
-      document.getElementById("login-dropdown").style.display = "none";
-      document.querySelector(".register-btn").style.display = "none";
+         const modal = bootstrap.Modal.getInstance(document.getElementById('authModal'));
+          alert("✅ Login success, Welcome: " + data.user.username);
+        if (modal) modal.hide();
+
+        // Success message
+        showLoginStatus(`Welcome, ${data.user.username}! You are a ${data.user.userType}.`);
+
+     // document.querySelector(".login-btn").style.display = "none";
+     // document.getElementById("login-dropdown").style.display = "none";
+     // document.querySelector(".register-btn").style.display = "none";
       document.querySelector(".logout-btn").style.display = "block";
       document.querySelector(".profile-btn").style.display = "inline-block";
 
@@ -309,10 +312,7 @@ function submitLogin() {
   });
 }
 
-function toggleRegisterDropdown() {
-  const dropdown = document.getElementById("register-dropdown");
-  dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
-}
+
 
 
 
@@ -1877,4 +1877,9 @@ function toggleDrawer() {
   drawer.classList.toggle("open");
   wrapper.classList.toggle("shifted");
   logo.classList.toggle("logo-shift");
+}
+
+function openAuthModal() {
+  const modal = new bootstrap.Modal(document.getElementById('authModal'));
+  modal.show();
 }
