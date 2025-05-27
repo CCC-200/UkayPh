@@ -252,6 +252,7 @@ function handleLogout() {
     document.getElementById("osy-orders-btn1").style.display = "none";
        document.getElementById("seller-orders-btn").style.display = "none";
        document.getElementById("osy-rating-btn").style.display = "none";
+       document.getElementById("osy-orderhistory-btn").style.display = "none";
 
 // 🔄 Clear like state memory
 Object.keys(likedProducts).forEach(key => delete likedProducts[key]);
@@ -1251,13 +1252,14 @@ function openOrdersModal() {
         actionButtons = `<button class="btn btn-sm btn-warning" onclick="confirmReceive('${order.id}')">Cancel Order</button>`;
       }
       else if (status === "delivered") {
-        actionButtons = `<button class="btn btn-sm btn-success" onclick="confirmReceive('${order.id}')">Confirm Delivery</button>`;
+        actionButtons = `<button class="btn btn-sm btn-success" onclick="confirmReceive('${order.id}')">Confirm received delivery</button>`;
       }
 const statuz = status?.toLowerCase();
 const statusLabels = {
-  accepted: `<span class="badge bg-warning">En-route, delivery on the way</span>`,
-  completed: `<span class="badge bg-success">Delivered. Thank you for supporting local</span>`,
-  pending: `<span class="badge bg-secondary">Processing Order</span>`
+  accepted: `<span class="badge bg-warning">En-route, OSY delivery on the way</span>`,
+  completed: `<span class="badge bg-success">Completed. Thank you for supporting local seller and OSY Partner</span>`,
+  received: `<span class="badge bg-info">Received. Pending Order completion of Seller</span>`,
+  pending: `<span class="badge bg-secondary">Processing Order.</span>`
 };
 
 
@@ -1298,12 +1300,9 @@ function confirmReceive(orderId) {
   })
   .then(res => res.json())
   .then(data => {
-    if (data.success || data.order) {
-      alert("✅ Order marked as received.");
+   //FIX BUG ERROR NO CATCHING PARAMS only tagging bug fix me 
       openOrdersModal(); // refresh
-    } else {
-      alert("❌ Failed to confirm: " + (data.message || "Unknown error"));
-    }
+    
   })
   .catch(err => {
     console.error("❌ Confirm receive error:", err);
@@ -1773,33 +1772,33 @@ function deliverOrder(orderId) {
   });
 }
 
-function confirmReceive(orderId) {
-  const token = localStorage.getItem("token");
+//function confirmReceive(orderId) {
+  //const token = localStorage.getItem("token");
 
-  if (!confirm("Confirm you have received this order?")) return;
+  //if (!confirm("Confirm you have received this order?")) return;
 
-  fetch(`${API_BASE}/receiveOrder`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`
-    },
-    body: JSON.stringify({ order_id: orderId })
-  })
-  .then(res => res.json())
-  .then(data => {
-    if (data.success || data.order) {
-      alert("✅ Order marked as received.");
-      openOrdersModal(); // refresh modal list
-    } else {
-      alert("❌ Failed to confirm: " + (data.message || "Unknown error"));
-    }
-  })
-  .catch(err => {
-    console.error("❌ Receive order error:", err);
-    alert("❌ Error: " + err.message);
-  });
-}
+  //fetch(`${API_BASE}/receiveOrder`, {
+    //method: "POST",
+    //headers: {
+     // "Content-Type": "application/json",
+      //Authorization: `Bearer ${token}`
+    //},
+    //body: JSON.stringify({ order_id: orderId })
+  //})
+  //.then(res => res.json())
+  //.then(data => {
+   // if (data.success || data.order) {
+    //  alert("✅ Order marked as received.");
+     // openOrdersModal(); // refresh modal list
+    //} else {
+    //  alert("❌ Failed to confirm: " + (data.message || "Unknown error"));
+    //}
+  //})
+  //.catch(err => {
+   // console.error("❌ Receive order error:", err);
+   // alert("❌ Error: " + err.message);
+  //});
+//}
 
 function completeOrder(orderId) {
   const token = localStorage.getItem("token");
