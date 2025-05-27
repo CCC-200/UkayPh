@@ -1868,3 +1868,13 @@ function openRateOsyModal(orderId, deliveryId) {
     openOsyRatingsModal({ orderId, deliveryId });
   }, 300);
 }
+
+function toggleDrawer() {
+  const drawer = document.getElementById("side-drawer");
+  const wrapper = document.getElementById("site-wrapper");
+  const logo = document.getElementById("site-logo");
+
+  drawer.classList.toggle("open");
+  wrapper.classList.toggle("shifted");
+  logo.classList.toggle("logo-shift");
+}

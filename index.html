@@ -12,9 +12,51 @@
   </style>
 </head>
 <body>
+  <div id="site-container" class="site-container">
+ <div id="side-drawer" class="side-drawer">
+ 
+  <h5 class="drawer-title">Navigation</h5>
+  <hr />
+<nav class="drawer-nav">
+
+  <button class="btn btn-warning profile-btn drawer-link" onclick="openProfileModal()" style="display: none;">
+    👤 My Profile
+  </button>
+
+  <button class="btn btn-secondary" id="customer-address-btn" onclick="openCustomerAddressModal()" style="display: none;">
+    📍 My Address
+  </button>
+
+  <button class="btn btn-warning ShopDetails-btn drawer-link" onclick="openShopDetailsModal()" style="display: none;">
+    🏬 My Shop
+  </button>
+
+  <button class="btn btn-dark" id="seller-orders-btn" onclick="openSellerOrdersModal()" style="display: none;">
+    📦 Active Orders
+  </button>
+
+  <button class="btn btn-info ms-2" id="my-orders-btn" onclick="openOrdersModal()" style="display: none;">
+    📋 My Orders
+  </button>
+
+  <button class="btn btn-success" id="osy-orders-btn" onclick="openOsyOrdersModal()" style="display: none;">
+    🚚 OSY Orders
+  </button>
+
+  <button class="btn btn-info ms-2" id="osy-rating-btn" onclick="openOsyRatingsModal()" style="display: none;">
+    ⭐ OSY Ratings
+  </button>
+
+  <button class="logout-btn drawer-link logout" onclick="handleLogout()" style="display: none;">
+    🚪 Logout
+  </button>
+
+</nav>
+</div>
+  <div id="site-wrapper" class="site-wrapper">
   <script src="Ukay.js"></script>
   <header>
-    <a href="/" class="navbar-brand d-flex align-items-center">
+    <a href="/" class="navbar-brand d-flex align-items-center" id="site-logo" style="margin-left: 3rem;">
   <img src="https://ucarecdn.com/3c4a0912-c40d-4d26-a330-d4ac1dba60eb/logo02.png" alt="Ukay Logo" style="height: 40px;">
 </a>
     <div class="button-row">
@@ -516,7 +558,11 @@
     <p class="text-center mb-0">&copy; 2025 UkayApp. All rights reserved.</p>
   </div>
 </footer>
+</div>
+</div>
 
+<!-- TOGGLE BUTTON -->
+<button class="drawer-toggle" onclick="toggleDrawer()">☰</button>
 </body>
 </html>
 
