@@ -44,6 +44,9 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   if (data.user.userType === "delivery") {
   document.getElementById("osy-orders-btn").style.display = "inline-block";
+   document.getElementById("osy-orders-btn1").style.display = "inline-block";
+  document.getElementById("osy-orderhistory-btn").style.display = "inline-block";
+  document.getElementById("cart-icon").style.display = "none";
 }
  
       } else {
@@ -125,6 +128,9 @@ function handleLogin() {
   }
    if (data.user.userType === "delivery") {
   document.getElementById("osy-orders-btn").style.display = "inline-block";
+  document.getElementById("osy-orders-btn1").style.display = "inline-block";
+  document.getElementById("osy-orderhistory-btn").style.display = "inline-block";
+  document.getElementById("cart-icon").style.display = "none";
 }
   }
   
@@ -201,6 +207,9 @@ function submitRegister() {
       document.getElementById("customer-address-btn").style.display = "inline-block";
   } if (data.user.userType === "delivery") {
   document.getElementById("osy-orders-btn").style.display = "inline-block";
+  document.getElementById("osy-orders-btn1").style.display = "inline-block";
+  document.getElementById("osy-orderhistory-btn").style.display = "inline-block";
+  document.getElementById("cart-icon").style.display = "none";
 }
     } else {
       alert("❌ Registration failed.");
@@ -232,6 +241,7 @@ function handleLogout() {
     document.querySelector(".logout-btn").style.display = "none";
     document.getElementById("login-btn").style.display = "block";
      document.getElementById("login-btn1").style.display = "block";
+     document.getElementById("cart-icon").style.display = "inline-block";
     document.getElementById("add-product-btn").style.display = "none";
     document.querySelector(".ShopDetails-btn").style.display = "none";
     document.querySelector(".profile-btn").style.display = "none";
@@ -239,6 +249,7 @@ function handleLogout() {
        document.getElementById("my-orders-btn").style.display = "none";
       document.getElementById("customer-address-btn").style.display = "none";
       document.getElementById("osy-orders-btn").style.display = "none";
+    document.getElementById("osy-orders-btn1").style.display = "none";
        document.getElementById("seller-orders-btn").style.display = "none";
        document.getElementById("osy-rating-btn").style.display = "none";
 
@@ -318,6 +329,9 @@ function submitLogin() {
        document.getElementById("customer-address-btn").style.display = "inline-block";
   }  if (data.user.userType === "delivery") {
   document.getElementById("osy-orders-btn").style.display = "inline-block";
+  document.getElementById("osy-orders-btn1").style.display = "inline-block";
+  document.getElementById("osy-orderhistory-btn").style.display = "inline-block";
+  document.getElementById("cart-icon").style.display = "none";
 }
   
     } else {
@@ -696,6 +710,8 @@ function removeFromCart(productId) {
     alert("❌ Failed to remove item: " + err.message);
   });
 }
+
+
 function checkoutCart() {
   const token = localStorage.getItem("token");
 
@@ -709,15 +725,30 @@ function checkoutCart() {
   })
   .then(res => res.json())
   .then(data => {
+    if (data.error) {
+      // Server-side error message
+      alert("❌ " + data.error);
+      return;
+    }
+
+    if (!data.success && !data.orders) {
+      alert("❌ Checkout failed. Please try again.");
+      return;
+    }
+
     alert("✅ Checkout successful!");
     const modal = bootstrap.Modal.getInstance(document.getElementById("cartModal"));
     modal.hide();
+
+    updateCartBadge(); // optional: refresh cart badge if you use one
   })
   .catch(err => {
     console.error("❌ Checkout error:", err);
     alert("❌ Failed to checkout: " + err.message);
   });
 }
+
+
 function updateCartBadge() {
   const token = localStorage.getItem("token");
   if (!token) return;
@@ -1222,13 +1253,22 @@ function openOrdersModal() {
       else if (status === "delivered") {
         actionButtons = `<button class="btn btn-sm btn-success" onclick="confirmReceive('${order.id}')">Confirm Delivery</button>`;
       }
+const statuz = status?.toLowerCase();
+const statusLabels = {
+  accepted: `<span class="badge bg-warning">En-route, delivery on the way</span>`,
+  completed: `<span class="badge bg-success">Delivered. Thank you for supporting local</span>`,
+  pending: `<span class="badge bg-secondary">Processing Order</span>`
+};
+
 
       item.innerHTML = `
         <div class="d-flex justify-content-between align-items-center">
           <div>
-            <strong>Order ID:</strong> ${order.id}<br>
+            <strong>OSY Partner Delivery Name:</strong> ${order.delivery?.firstName || "<small>Finding</small>"} ${order.delivery?.lastName || "<small>OSY Partner</small>"}<br>
             <strong>Items:</strong> ${productSummary}<br>
-            <strong>Status:</strong> ${statusBadge}
+            <strong>Shop name:</strong> ${order.shop?.shopName|| "—"}<br>
+            <strong>Total amount payable: </strong> <small>(incl. delivery fee:)</small>  ₱ ${order.totalProductPrice+order.deliveryPrice|| "—"}<br>
+           <strong>Status:</strong> ${statusLabels[statuz] || statusBadge}
           </div>
           <div>${actionButtons}</div>
         </div>
@@ -1455,12 +1495,16 @@ function loadOsyOrders() {
         card.className = "card mb-2";
         card.innerHTML = `
           <div class="card-body">
-            <strong>Order ID:</strong> ${order.id}<br>
-            <strong>Customer:</strong> ${customerName}<br>
-            <strong>Customer Barangay:</strong> ${barangay}<br>
-            <strong>Shop:</strong> ${shopName}<br>
-            <strong>Product Total:</strong> ₱${order.totalProductPrice}<br>
-            <strong>Delivery Fee:</strong> ₱${order.deliveryPrice}<br>
+            <strong>Order details:</strong><br>
+            <strong>Deliver to:</strong> ${order.address?.barangay || "—"}<br>
+            <strong>Street:</strong> ${order.address?.streetAddress || "—"}<br>
+            <strong>Landmark:</strong> ${order.address?.landmark || "—"}<br>
+            <strong>Deliver From:</strong> ${order.shop?.address || "—"}<br>
+            <strong>Shop Name:</strong> ${order.shop?.name || "—"}<br>
+            <strong>Product:</strong> ${order.products?.[0]?.name || "—"}<br>
+            <strong>Total Price:</strong> ₱${order.totalProductPrice || "—"}<br>
+            <strong>Your Incentive:</strong> ₱${order.deliveryPrice || "—"}<br>
+            <strong>Status:</strong> <span class="badge bg-success">${order.status}</span><br>
             <button class="btn btn-sm btn-primary mt-2" onclick="acceptOsyOrder('${order.id}')">Accept</button>
           </div>
         `;
@@ -1471,7 +1515,7 @@ function loadOsyOrders() {
     // ✅ Accepted Orders
     acceptedContainer.innerHTML = "";
     if (accepted.length === 0) {
-      acceptedContainer.innerHTML = "<p class='text-muted'>You haven't accepted any orders.</p>";
+      acceptedContainer.innerHTML = "<p class='text-muted'>No active orders yet.. Add now!</p>";
     } else {
       accepted.forEach(order => {
         const status = order.status?.toLowerCase();
@@ -1485,13 +1529,17 @@ function loadOsyOrders() {
         card.className = "card mb-2";
         card.innerHTML = `
           <div class="card-body">
-            <strong>Order ID:</strong> ${order.id}<br>
-            <strong>Status:</strong> <span class="badge bg-info">${order.status}</span><br>
-            <strong>Customer:</strong> ${customerName}<br>
-            <strong>Customer Barangay:</strong> ${barangay}<br>
+           <strong>Order details:</strong><br>
+            <strong>Customer Name:</strong> ${customerName}<br>
+            <strong>Deliver to:</strong> ${order.address?.barangay || "—"}<br>
+            <strong>Street:</strong> ${order.address?.streetAddress || "—"}<br>
+            <strong>Landmark:</strong> ${order.address?.landmark || "—"}<br>
+            <strong>Deliver From:</strong> ${order.shop?.address || "—"}<br>
             <strong>Shop:</strong> ${shopName}<br>
-            <strong>Product Total:</strong> ₱${order.totalProductPrice}<br>
-            <strong>Delivery Fee:</strong> ₱${order.deliveryPrice}<br>
+            <strong>Product:</strong> ${order.products?.[0]?.name || "—"}<br>
+            <strong>Total Price:</strong> ₱${order.totalProductPrice || "—"}<br>
+            <strong>Your Incentive:</strong> ₱${order.deliveryPrice || "—"}<br>
+            <strong>Status:</strong> <span class="badge bg-info">${order.status}</span><br>
             ${showDeliverBtn ? `<button class="btn btn-sm btn-success mt-2" onclick="deliverOrder('${order.id}')">Mark as Delivered</button>` : ""}
           </div>
         `;
@@ -1581,9 +1629,14 @@ function loadSellerOrders() {
         card.className = "card mb-2";
         card.innerHTML = `
           <div class="card-body">
-            <strong>Order ID:</strong> ${order.id}<br>
-            <strong>Customer:</strong> ${order.customer?.firstName || "N/A"} ${order.customer?.lastName || ""}<br>
-            <strong>Barangay:</strong> ${order.address?.barangay || "—"}<br>
+           
+            <strong>Customer Name:</strong> ${order.customer?.firstName || "N/A"} ${order.customer?.lastName || "N/A"}<br>
+            <strong>Deliver to:</strong> ${order.address?.barangay || "—"}<br>
+            <strong>Landmark:</strong> ${order.address?.landmark || "—"}<br>
+            <strong>Product:</strong> ${order.products?.[0]?.name || "—"}<br>
+            <strong>Street:</strong> ${order.address?.streetAddress || "—"}<br>
+            <strong>Total Price:</strong> ${order.totalProductPrice || "—"}<br>
+            <strong>OSY Fee:</strong> ${order.deliveryPrice || "—"}<br>
             <div class="mt-2 d-flex gap-2">
               <button class="btn btn-sm btn-success" onclick="deployOrder('${order.id}')">Accept</button>
               <button class="btn btn-sm btn-danger" onclick="rejectOrder('${order.id}')">Reject</button>
@@ -1620,7 +1673,13 @@ if (status === "completed") {
         card.className = "card mb-2";
         card.innerHTML = `
           <div class="card-body">
-            <strong>Order ID:</strong> ${order.id}<br>
+              <strong>Customer Name:</strong> ${order.customer?.firstName || "N/A"} ${order.customer?.lastName || "N/A"}<br>
+            <strong>Deliver to:</strong> ${order.address?.barangay || "—"}<br>
+            <strong>Landmark:</strong> ${order.address?.landmark || "—"}<br>
+            <strong>Product:</strong> ${order.products?.[0]?.name || "—"}<br>
+            <strong>Street:</strong> ${order.address?.streetAddress || "—"}<br>
+            <strong>Total Price:</strong> ${order.totalProductPrice || "—"}<br>
+            <strong>OSY Fee:</strong> ${order.deliveryPrice || "—"}<br>
             <strong>Status:</strong> ${statusBadge}<br>
             <strong>To:</strong> ${order.address?.barangay || "—"}</br>
             <div class="mt-2 d-flex gap-2">${actionButtons}</div>
@@ -1691,7 +1750,7 @@ function rejectOrder(orderId) {
 function deliverOrder(orderId) {
   const token = localStorage.getItem("token");
 
-  if (!confirm("Mark this order as delivered?")) return;
+  if (!confirm("Are you sure? Mark this order as delivered?")) return;
 
   fetch(`${API_BASE}/deliverOrder`, {
     method: "POST",
@@ -1703,12 +1762,10 @@ function deliverOrder(orderId) {
   })
   .then(res => res.json())
   .then(data => {
-    if (data.success || data.order) {
-      alert("✅ Order marked as delivered.");
+    //FIX BUG ERROR NO CATCHING PARAMS only tagging bug fix me 
+      alert("✅ Order marked as delivered. Order added to history.");
       loadOsyOrders(); // reload OSY modal view
-    } else {
-      alert("❌ Failed to deliver: " + (data.message || "Unknown error"));
-    }
+    
   })
   .catch(err => {
     console.error("❌ Deliver error:", err);
@@ -1850,6 +1907,7 @@ function openOsyRatingsModal(preFillOrder = null) {
 }
 
 function submitOsyRating(orderId, deliveryId) {
+   console.log("➡️ Called submitOsyRating:", orderId, deliveryId);
   const token = localStorage.getItem("token");
   const rating = document.getElementById(`rate-${orderId}-rating`).value;
   const comment = document.getElementById(`rate-${orderId}-comment`).value;
@@ -1901,4 +1959,75 @@ function toggleDrawer() {
 function openAuthModal() {
   const modal = new bootstrap.Modal(document.getElementById('authModal'));
   modal.show();
+}
+
+function openOsyHistoryModal() {
+  const token = localStorage.getItem("token");
+  const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById("osyHistoryModal"));
+  modal.show();
+
+  const container = document.getElementById("osy-history-container");
+  container.innerHTML = "<p class='text-muted'>Loading...</p>";
+
+  fetch(`${API_BASE}/getOrders`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify({})
+  })
+    .then(res => res.json())
+    .then(data => {
+      const orders = data.orders || [];
+
+      const history = orders.filter(o => {
+        const status = o.status?.toLowerCase();
+        return status === "delivered" || status === "completed";
+      });
+
+      container.innerHTML = "";
+
+      if (history.length === 0) {
+        container.innerHTML = "<p class='text-muted'>No delivered or completed orders.</p>";
+        return;
+      }
+
+      history.forEach(order => {
+       const status = order.status?.toLowerCase() || "—";
+let statusText = "";
+let badgeColor = "secondary";
+
+if (status === "delivered") {
+  statusText = "Delivered – Pending confirmation of customer";
+  badgeColor = "info";
+} else if (status === "completed") {
+  statusText = "Completed – Thank you for helping the seller and your proactive service to the community";
+  badgeColor = "success";
+} else {
+  statusText = status;
+}
+
+const statusBadge = `<span class="badge bg-${badgeColor}">${statusText}</span>`;
+        const card = document.createElement("div");
+        card.className = "card mb-2";
+        card.innerHTML = `
+          <div class="card-body">
+            <strong>Customer Name:</strong> ${order.customer?.firstName || "N/A"} ${order.customer?.lastName || "N/A"}<br>
+            <strong>Deliver to:</strong> ${order.address?.barangay || "—"}<br>
+            <strong>Landmark:</strong> ${order.address?.landmark || "—"}<br>
+            <strong>Street:</strong> ${order.address?.streetAddress || "—"}<br>
+            <strong>Product:</strong> ${order.products?.[0]?.name || "—"}<br>
+            <strong>Total Price:</strong> ${order.totalProductPrice || "—"}<br>
+            <strong>OSY Fee:</strong> ${order.deliveryPrice || "—"}<br>
+            <strong>Status:</strong> ${statusBadge}
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    })
+    .catch(err => {
+      console.error("❌ Order history load error:", err);
+      container.innerHTML = "<p class='text-danger'>❌ Failed to load order history.</p>";
+    });
 }

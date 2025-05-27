@@ -42,6 +42,9 @@
   <button class="btn btn-success drawer-link" id="osy-orders-btn" onclick="openOsyOrdersModal()" style="display: none;">
     🚚 OSY Orders
   </button>
+   <button class="btn btn-light drawer-link" id="osy-orderhistory-btn" onclick="openOsyHistoryModal()" style="display: none;">
+    🕒 Delivery History
+  </button>
 
   <button class="btn btn-info drawer-link" id="osy-rating-btn" onclick="openOsyRatingsModal()" style="display: none;">
     ⭐ OSY Ratings
@@ -75,13 +78,13 @@
         <button class="btn btn-warning ShopDetails-btn" onclick="openShopDetailsModal()" style="display: none;">My Shop Address</button>
         <button class="btn btn-info ms-2" id="my-orders-btn" onclick="openOrdersModal() " style="display: none;">My Orders</button>
         <button class="btn btn-secondary" id="customer-address-btn" onclick="openCustomerAddressModal()" style="display: none;">My Address</button>
-       <button class="btn btn-success" id="osy-orders-btn" onclick="openOsyOrdersModal()" style="display: none;"> My Orders</button>
+       <button class="btn btn-success" id="osy-orders-btn1" onclick="openOsyOrdersModal()" style="display: none;">🚚 OSY Orders</button>
        <button class="btn btn-dark" id="seller-orders-btn" onclick="openSellerOrdersModal()" style="display: none;">Active Orders</button>
       <button class="btn btn-info ms-2" id="osy-rating-btn" onclick="openOsyRatingsModal()" style="display: none;">OSY Ratings</button>
         <div class="button-row">
           <button id="add-product-btn" class="btn btn-success" style="display: none;" onclick="openAddProductModal()">+ Add Product</button>
          <button class="btn no-hover-change" id="login-btn1" style="background-color:#fee3ae;" onclick="openAuthModal()">👤Sign in</button>
-          <div id="cart-icon" onclick="ToggleCart()" style="cursor: pointer; position: relative; font-size: 1.8rem; margin-right: 1rem;">
+          <div id="cart-icon" onclick="ToggleCart()" style="display: none; cursor: pointer; position: relative; font-size: 1.8rem; margin-right: 1rem;">
   <i class="bi bi-cart4 text-white"></i>
   <span id="cart-count" class="badge bg-danger rounded-pill" style="position: absolute; top: -10px; right: -10px; font-size: 0.75rem; min-width: 1.3rem; height: 1.3rem; display: flex; align-items: center; justify-content: center;">
     0
@@ -546,6 +549,20 @@
             <button class="btn btn-success w-100" onclick="submitRegister()">Register</button>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="osyHistoryModal" tabindex="-1" aria-labelledby="osyHistoryModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="osyHistoryModalLabel">🕒 Delivery History</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="osy-history-container">
+        <!-- History will be loaded here -->
       </div>
     </div>
   </div>
