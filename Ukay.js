@@ -154,14 +154,27 @@ function submitRegister() {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ username, password, userType })
   })
-  .then(response => {
-    if (!response.ok) throw new Error("Registration failed");
-    return response.json();
-  })
+  
+ .then(async response => {
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error("❌ Registration failed: " + (data.message || data.error || "Unknown error"));
+  }
+
+  return data;
+})
+
+  
   .then(data => {
     if (data.token && data.user) {
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
+
+         const modal = bootstrap.Modal.getInstance(document.getElementById('authModal'));
+          alert("✅ Registration success, Welcome: " + data.user.username + "Make sure to complete profile before doing anything!");
+        if (modal) modal.hide();
+
       showLoginStatus(`Registered and logged in as ${data.user.username}. You are a ${data.user.userType}`);
       //document.getElementById("register-dropdown").style.display = "none";
       //document.querySelector(".register-btn").style.display = "none";
