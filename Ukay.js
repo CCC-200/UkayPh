@@ -21,8 +21,8 @@ document.addEventListener("DOMContentLoaded", () => {
       if (data.user) {
         localStorage.setItem("user", JSON.stringify(data.user));
         showLoginStatus(`Welcome back, ${data.user.username}! You are a ${data.user.userType}. `);
-       // document.querySelector(".login-btn").style.display = "none";
-       // document.querySelector(".logout-btn").style.display = "inline-block";
+        document.getElementById("login-btn").style.display = "none";
+        document.querySelector(".logout-btn").style.display = "inline-block";
         document.querySelector(".profile-btn").style.display = "inline-block";
        // document.querySelector(".register-btn").style.display = "none";
         
@@ -46,7 +46,7 @@ document.addEventListener("DOMContentLoaded", () => {
 }
  
       } else {
-        //document.querySelector(".login-btn").style.display = "block";
+        document.getElementById("login-btn").style.display = "block";
         //document.querySelector(".logout-btn").style.display = "none";
         document.getElementById("add-product-btn").style.display = "none";
         document.querySelector(".ShopDetails-btn").style.display = "none";
@@ -103,7 +103,7 @@ function handleLogin() {
     
   }
         // Optionally disable the login button
-        //document.querySelector(".login-btn").disabled = true;
+        document.getElementById("login-btn").disabled = true;
       } else {
         alert("Login failed: Missing token or user data.");
       
@@ -165,7 +165,7 @@ function submitRegister() {
       showLoginStatus(`Registered and logged in as ${data.user.username}. You are a ${data.user.userType}`);
       //document.getElementById("register-dropdown").style.display = "none";
       //document.querySelector(".register-btn").style.display = "none";
-      //document.querySelector(".login-btn").style.display = "none";
+      document.getElementById("login-btn").style.display = "none";
       document.querySelector(".logout-btn").style.display = "inline-block";
       document.querySelector(".profile-btn").style.display = "inline-block";
       if (data.user.userType === "shop") {
@@ -213,7 +213,7 @@ function handleLogout() {
 
     // Reset UI state
     document.querySelector(".logout-btn").style.display = "none";
-    //document.querySelector(".login-btn").style.display = "block";
+    document.getElementById("login-btn").style.display = "block";
     document.getElementById("add-product-btn").style.display = "none";
     document.querySelector(".ShopDetails-btn").style.display = "none";
     document.querySelector(".profile-btn").style.display = "none";
@@ -277,7 +277,7 @@ function submitLogin() {
         // Success message
         showLoginStatus(`Welcome, ${data.user.username}! You are a ${data.user.userType}.`);
 
-     // document.querySelector(".login-btn").style.display = "none";
+      document.getElementById("login-btn").style.display = "none";
      // document.getElementById("login-dropdown").style.display = "none";
      // document.querySelector(".register-btn").style.display = "none";
       document.querySelector(".logout-btn").style.display = "block";
