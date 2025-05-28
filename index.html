@@ -7,6 +7,7 @@
    <meta charset="UTF-8">
   <title>UkayIligan</title>
   <link rel="icon" type="image/png" href="https://ucarecdn.com/01016b26-1a80-491e-ad74-7b4e57af5078/favicon32x32.png" sizes="32x32">
+  <script src="https://kit.fontawesome.com/0fe895e7b1.js" crossorigin="anonymous"></script>
   
   <style>
   </style>
@@ -57,9 +58,9 @@
   
    <button class="btn no-hover-change drawer-link" id="login-btn" style="background-color:#fee3ae;" onclick="openAuthModal()"> 👤 Sign in</button>
 
-  <button class="btn btn-success drawer-link" onclick="">
-    ❓ Tutorial
-  </button>
+ <button class="btn btn-success drawer-link" data-bs-toggle="modal" data-bs-target="#tutorialModal">
+  ❓ Tutorial
+</button>
 <button class="btn btn-success drawer-link" data-bs-toggle="modal" data-bs-target="#feedbackModal">
   🚀 Send Feedback
 </button>
@@ -601,6 +602,51 @@
         <!-- GIF Image (Right Side) -->
         <div class="col-md-5 d-flex justify-content-center align-items-center">
           <img src="https://media.tenor.com/boVuYINAydMAAAAj/space-x-spacex.gif" alt="SpaceX Feedback" class="img-fluid rounded">
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Tutorial Modal -->
+<div class="modal fade" id="tutorialModal" tabindex="-1" aria-labelledby="tutorialModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="tutorialModalLabel">❓ How to use UkayIligan</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-center">
+        <p class="text-muted">
+          This guide will help you navigate and use the UkayIligan system.<br>
+          Please select below the category that best fits your use case:
+        </p>
+
+        <div class="row mt-4">
+          <div class="col-md-3 col-6 mb-3">
+            <button class="btn btn-outline-primary w-100" onclick="startTutorial('customer')">
+              <i class="fas fa-user fa-lg mb-2"></i><br>
+              Customer
+            </button>
+          </div>
+          <div class="col-md-3 col-6 mb-3">
+            <button class="btn btn-outline-success w-100" onclick="startTutorial('seller')">
+              <i class="fas fa-shirt"></i><br>
+              Seller
+            </button>
+          </div>
+          <div class="col-md-3 col-6 mb-3">
+            <button class="btn btn-outline-warning w-100" onclick="startTutorial('osy')">
+              <i class="fas fa-motorcycle fa-lg mb-2"></i><br>
+              OSY Partner
+            </button>
+          </div>
+          <div class="col-md-3 col-6 mb-3">
+            <button class="btn btn-outline-info w-100" onclick="startTutorial('enthusiast')">
+              <i class="fas fa-user-cog fa-lg mb-2"></i><br>
+              Enthusiast
+            </button>
+          </div>
         </div>
       </div>
     </div>
