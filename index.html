@@ -60,9 +60,9 @@
   <button class="btn btn-success drawer-link" onclick="">
     ❓ Tutorial
   </button>
-  <button class="btn btn-success drawer-link" onclick="">
-    🚀 Send Feedback
-  </button>
+<button class="btn btn-success drawer-link" data-bs-toggle="modal" data-bs-target="#feedbackModal">
+  🚀 Send Feedback
+</button>
 
 </nav>
 </div>
@@ -568,6 +568,45 @@
   </div>
 </div>
 
+<!-- Feedback Modal -->
+<div class="modal fade" id="feedbackModal" tabindex="-1" aria-labelledby="feedbackModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="feedbackModalLabel">📢 Tell us what you thought</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body row">
+        <!-- Text Content (Left Side) -->
+        <div class="col-md-7">
+          <p class="text-muted">
+            <strong>Your feedback is important to us.</strong><br>
+            We are constantly working to improve our web application system. Please feel free to share your suggestions, feedback, or ideas for improvement using the contact methods below.
+          </p>
+          <hr>
+          <p>
+            <strong>📩 Contact Email:</strong> ukay.ccc200@gmail.com<br>
+            <strong>📞 Phone:</strong>
+            <a href="tel:+639167756497" class="text-decoration-none">+63 916 775 6497</a>
+          </p>
+          <p>
+            <strong>🔗 Feedback Form:</strong>
+             <a href="https://docs.google.com/forms/d/e/1FAIpQLSfWvZ54Wf4ak4YG7TT09HQPXTKKj4wXh5FPciszd3j8dcTU_g/viewform?usp=header" target="_blank" class="btn btn-outline-primary w-100">
+          📝 Submit Feedback via Google Form
+        </a>
+          </p>
+          
+        </div>
+
+        <!-- GIF Image (Right Side) -->
+        <div class="col-md-5 d-flex justify-content-center align-items-center">
+          <img src="https://media.tenor.com/boVuYINAydMAAAAj/space-x-spacex.gif" alt="SpaceX Feedback" class="img-fluid rounded">
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <footer class="bg-dark text-light mt-5 pt-4 pb-3">
   <div class="container">
     <div class="row">
@@ -595,7 +634,7 @@
       <div class="col-md-4 mb-3">
         <h6>Feedback</h6>
         <p>We'd love to hear from you!</p>
-        <a href="mailto:marlourentucan123@gmail.com" class="text-warning d-block mb-2">marlourentucan123@gmail.com</a>
+        <a href="mailto:marlourentucan123@gmail.com" class="text-warning d-block mb-2">ukay.ccc200@gmail.com</a>
         <div>
           <a href="#" class="text-light me-3"><i class="bi bi-facebook"></i></a>
           <a href="#" class="text-light me-3"><i class="bi bi-twitter"></i></a>
