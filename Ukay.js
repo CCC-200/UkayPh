@@ -682,7 +682,7 @@ function removeFromCart(productId) {
   const token = localStorage.getItem("token");
   if (!token) return;
 
-  fetch(`${API_BASE}/updateCart`, {
+  fetch(`${API_BASE}/addToCart`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -702,9 +702,7 @@ function removeFromCart(productId) {
     const modalInstance = bootstrap.Modal.getInstance(document.getElementById("cartModal"));
     if (modalInstance) modalInstance.hide();
 
-    setTimeout(() => {
-      ToggleCart();
-    }, 200);
+    
   })
   .catch(err => {
     console.error("❌ Remove item error:", err);
@@ -1821,7 +1819,6 @@ function completeOrder(orderId) {
     alert("Error: " + err.message);
   });
 }
-
 function openOsyRatingsModal(preFillOrder = null) {
   const token = localStorage.getItem("token");
   const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById("osyRatingsModal"));
@@ -1830,27 +1827,48 @@ function openOsyRatingsModal(preFillOrder = null) {
   const container = document.getElementById("osy-ratings-container");
   container.innerHTML = "<p class='text-muted'>Loading...</p>";
 
-  fetch(`${API_BASE}/getOrders`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`
-    },
-    body: JSON.stringify({})
-  })
-  .then(res => res.json())
-  .then(data => {
-    const orders = data.orders || [];
+  Promise.all([
+    fetch(`${API_BASE}/getOrders`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify({})
+    }).then(res => res.json()),
 
-    const toRate = orders.filter(o => 
-      o.status?.toLowerCase() === "completed" && !o.review
+    fetch(`${API_BASE}/getReviews`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify({})
+    }).then(res => res.json())
+  ])
+  .then(([ordersData, reviewsData]) => {
+    const orders = ordersData.orders || [];
+    const reviews = reviewsData.reviews || [];
+
+    const reviewedMap = {};
+    reviews.forEach(r => {
+      reviewedMap[r.order_id] = r;
+    });
+
+    const toRate = orders.filter(o =>
+      o.status?.toLowerCase() === "completed" && !reviewedMap[o.id]
     );
-
-    const rated = orders.filter(o => o.review);
+    const rated = reviews.map(review => {
+      const matchingOrder = orders.find(o => o.id === review.order_id);
+      return {
+        ...review,
+        order: matchingOrder
+      };
+    });
 
     container.innerHTML = "";
 
-    // ✅ Render "to be rated"
+    // ⭐️ To be rated
     if (toRate.length > 0) {
       container.innerHTML += "<h5 class='mt-3'>Rate OSY</h5>";
       toRate.forEach(order => {
@@ -1870,28 +1888,41 @@ function openOsyRatingsModal(preFillOrder = null) {
       });
     }
 
-    // ✅ Render previous ratings
+    // ⭐️ Already rated
     if (rated.length > 0) {
       container.innerHTML += "<h5 class='mt-4'>Previously Rated</h5>";
-      rated.forEach(order => {
-        container.innerHTML += `
-          <div class="card mb-2">
-            <div class="card-body">
-              <strong>Order ID:</strong> ${order.id}<br>
-              <strong>OSY:</strong> ${order.delivery?.firstName || ""} ${order.delivery?.lastName || ""}<br>
-              <strong>Rating:</strong> ${order.review?.rating}/5<br>
-              <strong>Comment:</strong> ${order.review?.comment || "—"}
-            </div>
-          </div>
-        `;
-      });
+rated.forEach(r => {
+  const order = r.order || {};
+  const delivery = order.delivery || {};
+  const customer = order.customer || {};
+  const address = order.address || {};
+  const products = order.products || [];
+
+  const productList = products.map(p => `• ${p.name}`).join("<br>");
+
+  container.innerHTML += `
+    <div class="card mb-2">
+      <div class="card-body">
+
+        <strong>Customer:</strong> ${customer.firstName || ""} ${customer.lastName || ""}<br>
+        <strong>Address:</strong> ${address.barangay || ""}, ${address.streetAddress || ""}<br>
+        <strong>Items:</strong><br>${productList}<br>
+        <strong>Total Product Price:</strong> ₱${order.totalProductPrice || 0}<br>
+        <strong>Delivery Fee:</strong> ₱${order.deliveryPrice || 0}<br>
+        <strong>OSY:</strong> ${delivery.firstName || ""} ${delivery.lastName || ""}<br>
+        <strong>Rating:</strong> ${r.rating}/5<br>
+        <strong>Comment:</strong> ${r.comment || "—"}
+      </div>
+    </div>
+  `;
+});
     }
 
     if (toRate.length === 0 && rated.length === 0) {
       container.innerHTML = "<p class='text-muted'>No OSY ratings available.</p>";
     }
 
-    // 🧩 Optional: Pre-fill a specific one
+    // Auto-focus specific rating if provided
     if (preFillOrder) {
       setTimeout(() => {
         const rateInput = document.getElementById(`rate-${preFillOrder.orderId}-rating`);
@@ -1906,7 +1937,6 @@ function openOsyRatingsModal(preFillOrder = null) {
 }
 
 function submitOsyRating(orderId, deliveryId) {
-   console.log("➡️ Called submitOsyRating:", orderId, deliveryId);
   const token = localStorage.getItem("token");
   const rating = document.getElementById(`rate-${orderId}-rating`).value;
   const comment = document.getElementById(`rate-${orderId}-comment`).value;
@@ -1926,8 +1956,12 @@ function submitOsyRating(orderId, deliveryId) {
   })
   .then(res => res.json())
   .then(data => {
-    alert("✅ OSY rated successfully.");
-    openOsyRatingsModal(); // Refresh ratings
+    if (data.review) {
+      alert("✅ OSY rated successfully.");
+      openOsyRatingsModal(); // Refresh the modal
+    } else {
+      alert("❌ Failed to rate: " + (data.error || "Unknown error"));
+    }
   })
   .catch(err => {
     console.error("❌ Rating error:", err);
@@ -1999,6 +2033,10 @@ let badgeColor = "secondary";
 
 if (status === "delivered") {
   statusText = "Delivered – Pending confirmation of customer";
+  badgeColor = "info";
+}
+else if (status === "received") {
+  statusText = "Received – Pending confirmation of Seller";
   badgeColor = "info";
 } else if (status === "completed") {
   statusText = "Completed – Thank you for helping the seller and your proactive service to the community";
