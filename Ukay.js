@@ -1248,8 +1248,8 @@ function openOrdersModal() {
     ? `<button class="btn btn-sm btn-success" onclick="confirmReceive('${order.id}')">Confirm Delivery</button>`
     : ""
 }
-      } else if (status === "deployed") {
-        actionButtons = `<button class="btn btn-sm btn-warning" onclick="confirmReceive('${order.id}')">Cancel Order</button>`;
+      } else if (status === "processing") {
+        actionButtons = `<button class="btn btn-sm btn-warning" onclick="cancelOrder('${order.id}')">Cancel Order</button>`;
       }
       else if (status === "delivered") {
         actionButtons = `<button class="btn btn-sm btn-success" onclick="confirmReceive('${order.id}')">Confirm received delivery</button>`;
