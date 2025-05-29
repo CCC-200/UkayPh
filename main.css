@@ -314,3 +314,35 @@ color: #dee2e6;
      /* original btn-primary color */
     color: black !important;             /* original text color */
   }
+
+  
+  #notification-dropdown {
+    position: absolute;
+    top: 50px;
+    right: 1rem;
+    background: #f9f9f9;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    width: 320px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 999;
+    font-family: 'Segoe UI', sans-serif;
+  }
+
+  #notification-list {
+    max-height: 300px;
+    overflow-y: auto;
+    background: white;
+  }
+
+  .notification-item {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+    color: #333;
+  }
+
+  .notification-item.unread {
+    background-color: #eef6ff;
+    font-weight: bold;
+  }

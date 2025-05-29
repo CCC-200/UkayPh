@@ -35,6 +35,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.querySelector(".ShopDetails-btn").style.display = "inline-block";
      document.getElementById("seller-orders-btn").style.display = "inline-block";
      document.getElementById("osy-rating-btn").style.display = "inline-block";
+   //  document.getElementById("updateProductsBtn").style.display = "inline-block";
   }
   if (data.user.userType === "customer") {
       document.getElementById("cart-icon").style.display = "inline-block";
@@ -48,7 +49,7 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("osy-orderhistory-btn").style.display = "inline-block";
   document.getElementById("cart-icon").style.display = "none";
 }
- 
+ loadProducts();  
       } else {
         document.getElementById("login-btn").style.display = "block";
          document.getElementById("login-btn1").style.display = "block";
@@ -105,6 +106,7 @@ function handleLogin() {
     document.querySelector(".ShopDetails-btn").style.display = "inline-block";
      document.getElementById("seller-orders-btn").style.display = "inline-block";
      document.getElementById("osy-rating-btn").style.display = "inline-block";
+   //  document.getElementById("updateProductsBtn").style.display = "inline-block";
     
   }
         // Optionally disable the login button
@@ -199,6 +201,7 @@ function submitRegister() {
     document.querySelector(".ShopDetails-btn").style.display = "inline-block";
      document.getElementById("seller-orders-btn").style.display = "inline-block";
      document.getElementById("osy-rating-btn").style.display = "inline-block";
+   //  document.getElementById("updateProductsBtn").style.display = "inline-block";
     
   }if (data.user.userType === "customer") {
       document.getElementById("cart-icon").style.display = "inline-block";
@@ -253,6 +256,7 @@ function handleLogout() {
        document.getElementById("seller-orders-btn").style.display = "none";
        document.getElementById("osy-rating-btn").style.display = "none";
        document.getElementById("osy-orderhistory-btn").style.display = "none";
+ //      document.getElementById("updateProductsBtn").style.display = "none";
 
 // 🔄 Clear like state memory
 Object.keys(likedProducts).forEach(key => delete likedProducts[key]);
@@ -322,6 +326,7 @@ function submitLogin() {
     document.querySelector(".ShopDetails-btn").style.display = "inline-block";
      document.getElementById("seller-orders-btn").style.display = "inline-block";
      document.getElementById("osy-rating-btn").style.display = "inline-block";
+     //document.getElementById("updateProductsBtn").style.display = "inline-block";
    
   }if (data.user.userType === "customer") {
       document.getElementById("cart-icon").style.display = "inline-block";
@@ -334,7 +339,7 @@ function submitLogin() {
   document.getElementById("osy-orderhistory-btn").style.display = "inline-block";
   document.getElementById("cart-icon").style.display = "none";
 }
-  
+  loadProducts();
     } else {
       alert("❌ Login failed.");
     }
@@ -383,21 +388,20 @@ function renderProducts(products) {
   const list = document.getElementById("product-list");
   list.innerHTML = "";
 
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const userType = user.userType;
+  const myShopName = user?.profile?.shopName;
+console.log("Current userType:", userType);
   products.forEach(product => {
     const card = document.createElement("div");
     card.className = "product-card";
 
     const img = document.createElement("img");
-let imageUrl = product.imagePath;
-if (imageUrl && imageUrl.includes("ucarecdn.com") && !imageUrl.includes("-/preview/")) {
-  imageUrl = imageUrl + "-/preview/600x800/"; // ✅ optimized version
-}
-
-
+    let imageUrl = product.imagePath;
+    if (imageUrl && imageUrl.includes("ucarecdn.com") && !imageUrl.includes("-/preview/")) {
+      imageUrl += "-/preview/600x800/";
+    }
     img.src = imageUrl || "placeholder.jpg";
-
-
-
     img.alt = product.name;
 
     const details = document.createElement("div");
@@ -422,19 +426,28 @@ if (imageUrl && imageUrl.includes("ucarecdn.com") && !imageUrl.includes("-/previ
     const buttonGroup = document.createElement("div");
     buttonGroup.className = "product-buttons";
 
+    // ❤️ Like button (shown to everyone)
     const likeBtn = document.createElement("button");
     likeBtn.className = "btn btn-outline-danger btn-sm me-2";
     const heartIcon = likedProducts[product.id] ? "❤️" : "🤍";
-likeBtn.innerHTML = `${heartIcon} <span class="like-count">${product.likes || 0}</span>`;
-   likeBtn.onclick = () => heartProduct(product.id, likeBtn);
-
-    const cartBtn = document.createElement("button");
-    cartBtn.className = "btn btn-outline-primary btn-sm";
-    cartBtn.innerHTML = "🛒 Add to Cart";
-    cartBtn.onclick = () => addToCart(product.id);
-
+    likeBtn.innerHTML = `${heartIcon} <span class="like-count">${product.likes || 0}</span>`;
+    likeBtn.onclick = () => heartProduct(product.id, likeBtn);
     buttonGroup.appendChild(likeBtn);
-    buttonGroup.appendChild(cartBtn);
+
+    // Conditional cart or edit button
+    if (userType === "customer") {
+      const cartBtn = document.createElement("button");
+      cartBtn.className = "btn btn-outline-primary btn-sm";
+      cartBtn.innerHTML = "🛒 Add to Cart";
+      cartBtn.onclick = () => addToCart(product.id);
+      buttonGroup.appendChild(cartBtn);
+    } else if (userType === "shop" && product.shop?.shopName === myShopName) {
+      const editBtn = document.createElement("button");
+      editBtn.className = "btn btn-outline-secondary btn-sm";
+      editBtn.innerHTML = "✏️ Edit Product";
+      editBtn.onclick = () => openAddProductModal(product); // <-- make sure this exists
+      buttonGroup.appendChild(editBtn);
+    }
 
     details.appendChild(name);
     details.appendChild(description);
@@ -787,9 +800,23 @@ function showLoginModal() {
   loginModal.show();
 }
 
-function openAddProductModal() {
+function openAddProductModal(product = null) {
   const modal = new bootstrap.Modal(document.getElementById('addProductModal'));
   modal.show();
+
+  const isEdit = !!product;
+
+  // Prefill form if editing
+  document.getElementById("productName").value = product?.name || "";
+  document.getElementById("Pdesc").value = product?.description || "";
+  document.getElementById("productPrice").value = product?.price || "";
+  document.getElementById("productPromo").value = product?.promo || "";
+  document.getElementById("productQty").value = product?.quantity || "";
+
+  const widget = uploadcare.Widget('#uploadcare-input');
+  widget.value(product?.imagePath || "");
+  document.getElementById("add-product-form").dataset.editing = isEdit ? "true" : "false";
+  document.getElementById("add-product-form").dataset.productId = isEdit ? product.id : "";
 }
 
 // --- helper: promisified File → base64 string -----------------------------
@@ -822,21 +849,24 @@ async function uploadImage(file, token) {
 }
 
 
-async function submitAddProduct() {
+async function submitAddOrUpdateProduct() {
   const token = localStorage.getItem("token");
+  const form = document.getElementById("add-product-form");
+  const isEdit = form.dataset.editing === "true";
+  const productId = form.dataset.productId;
+
   const name = document.getElementById("productName").value.trim();
   const description = document.getElementById("Pdesc").value.trim();
   const price = parseFloat(document.getElementById("productPrice").value);
   const promo = parseFloat(document.getElementById("productPromo").value);
   const quantity = parseInt(document.getElementById("productQty").value, 10);
+  const widget = uploadcare.Widget('#uploadcare-input');
+  const file = widget.value();
 
   if (!name || isNaN(price) || isNaN(quantity)) {
     alert("Please complete all fields.");
     return;
   }
-
-  const widget = uploadcare.Widget('#uploadcare-input');
-  const file = widget.value();
 
   if (!file) {
     alert("Please upload an image.");
@@ -844,12 +874,14 @@ async function submitAddProduct() {
   }
 
   try {
-    // Wait for Uploadcare to finish processing the file
-    const fileInfo = await file.promise(); // ✅ Wait for file upload to complete
-    const imageCDNUrl = fileInfo.cdnUrl;   // ✅ Get CDN-hosted image URL
+
+    
+    const fileInfo = await file.promise();
+    const imageCDNUrl = fileInfo.cdnUrl;
 
     const payload = {
       productDetails: {
+        ...(isEdit && { id: productId }),
         imagePath: imageCDNUrl,
         name,
         description,
@@ -859,7 +891,9 @@ async function submitAddProduct() {
       }
     };
 
-    const response = await fetch(`${API_BASE}/addProduct`, {
+    const endpoint = isEdit ? "/updateProduct" : "/addProduct";
+
+    const res = await fetch(`${API_BASE}${endpoint}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -868,18 +902,16 @@ async function submitAddProduct() {
       body: JSON.stringify(payload)
     });
 
-    const data = await response.json();
+    const data = await res.json();
 
-    if (!response.ok) {
-      throw new Error(data.message || data.error || "Unknown error");
-    }
+    if (!res.ok) throw new Error(data.message || data.error || "Unknown error");
 
-    alert("✅ Product added!");
+    alert(`✅ Product ${isEdit ? "updated" : "added"} successfully!`);
     document.getElementById("add-product-form").reset();
     bootstrap.Modal.getInstance(document.getElementById("addProductModal")).hide();
     loadProducts();
   } catch (err) {
-    console.error("❌ Add product error:", err);
+    console.error("❌ Error:", err);
     alert("❌ Failed: " + err.message);
   }
 }
@@ -1256,7 +1288,7 @@ const statuz = status?.toLowerCase();
 const statusLabels = {
   accepted: `<span class="badge bg-warning">En-route, OSY delivery on the way</span>`,
   completed: `<span class="badge bg-success">Completed. Thank you for supporting local seller and OSY Partner</span>`,
-  received: `<span class="badge bg-info">Received. Pending Order completion of Seller</span>`,
+  received: `<span class="badge bg-info">Received. Pending order completion of seller</span>`,
   pending: `<span class="badge bg-secondary">Processing Order.</span>`
 };
 
@@ -2067,4 +2099,100 @@ const statusBadge = `<span class="badge bg-${badgeColor}">${statusText}</span>`;
       console.error("❌ Order history load error:", err);
       container.innerHTML = "<p class='text-danger'>❌ Failed to load order history.</p>";
     });
+  }
+
+
+  let notificationsVisible = false;
+
+function ToggleNotifications() {
+  const dropdown = document.getElementById("notification-dropdown");
+  notificationsVisible = !notificationsVisible;
+  dropdown.style.display = notificationsVisible ? "block" : "none";
+
+  if (notificationsVisible) loadNotifications();
 }
+
+function loadNotifications() {
+  const token = localStorage.getItem("token");
+  const list = document.getElementById("notification-list");
+  list.innerHTML = "<p class='text-muted p-2'>Loading...</p>";
+
+  fetch(`${API_BASE}/getNotifications`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify({})
+  })
+  .then(res => res.json())
+  .then(data => {
+    const notifications = data.notifications || [];
+    const unread = notifications.filter(n => !n.readState);
+    const badge = document.getElementById("notification-badge");
+    badge.style.display = unread.length > 0 ? "inline-block" : "none";
+
+    list.innerHTML = "";
+
+    if (notifications.length === 0) {
+      list.innerHTML = "<p class='text-muted p-2'>No notifications.</p>";
+      return;
+    }
+
+    notifications.forEach(n => {
+      const isUnread = !n.readState;
+     const div = document.createElement("div");
+div.className = `notification-item ${isUnread ? "unread" : ""}`;
+div.style.cssText = `
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+  color: #333;
+  background-color: ${isUnread ? "#eef6ff" : "white"};
+  font-weight: ${isUnread ? "bold" : "normal"};
+`;
+div.innerText = n.message;
+div.onclick = () => markAsRead(n.id);
+list.appendChild(div);
+    });
+  })
+  .catch(err => {
+    console.error("❌ Failed to load notifications:", err);
+    list.innerHTML = "<p class='text-danger p-2'>Failed to load notifications.</p>";
+  });
+}
+
+function markAsRead(notificationId) {
+  const token = localStorage.getItem("token");
+
+  fetch(`${API_BASE}/readNotification`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify({ notification_id: notificationId })
+  })
+  .then(res => res.json())
+  .then(() => {
+    loadNotifications(); // Refresh list + badge
+  })
+  .catch(err => {
+    console.error("❌ Failed to mark as read:", err);
+  });
+}
+
+// 👀 Optional: Check badge on page load
+document.addEventListener("DOMContentLoaded", () => {
+  loadNotifications();
+});
+
+document.addEventListener("click", function (event) {
+  const icon = document.getElementById("notification-icon");
+  const dropdown = document.getElementById("notification-dropdown");
+  if (!icon.contains(event.target) && !dropdown.contains(event.target)) {
+    dropdown.style.display = "none";
+    notificationsVisible = false;
+  }
+});
+ 
